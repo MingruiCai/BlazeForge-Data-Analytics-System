@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.RuleSystemMapper">
+
+    <select id="listPage" resultType="com.bcsd.project.domain.RuleSystem">
+        SELECT rs.*,
+        (SELECT CONCAT_WS(' / ',(SELECT `name` FROM project_dict_info WHERE id = pdi.pid),`name`) FROM project_dict_info pdi WHERE id = rs.file_type) file_type_name
+        FROM `rule_system` rs
+        WHERE delete_tag = 0
+        <if test="dataType != null">
+            AND data_type = #{dataType}
+        </if>
+        <if test="originalFileName != null and originalFileName != ''">
+            AND original_file_name LIKE concat('%', #{originalFileName}, '%')
+        </if>
+        ORDER BY update_time DESC
+    </select>
+
+</mapper>

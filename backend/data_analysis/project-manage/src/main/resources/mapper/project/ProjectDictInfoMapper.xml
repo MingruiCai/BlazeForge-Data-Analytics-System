@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProjectDictInfoMapper">
+
+    <select id="selectByPid" resultType="com.bcsd.project.domain.ProjectDictInfo">
+        SELECT id, `name`,remark,(SELECT `name` FROM project_dict_info WHERE id = pdi.pid) p_name FROM project_dict_info pdi
+        WHERE pdi.pid IN(SELECT id FROM project_dict_info WHERE pid = #{pid})
+    </select>
+
+    <select id="get145TypeByName" parameterType="list" resultType="string">
+        SELECT MAX(id) FROM `project_dict_info` WHERE (pid BETWEEN '03000000' AND '03999999')
+        <if test="list != null and list.size > 0">
+            AND `name` IN
+            <foreach collection="list" item="name" open="(" separator="," close=")">
+                #{name}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getTypeByName" parameterType="list" resultType="string">
+        SELECT MAX(id) FROM `project_dict_info` WHERE (pid BETWEEN '02000000' AND '02999999')
+        <if test="list != null and list.size > 0">
+            AND `name` IN
+            <foreach collection="list" item="name" open="(" separator="," close=")">
+                #{name}
+            </foreach>
+        </if>
+    </select>
+
+</mapper>

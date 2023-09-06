@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProjectImplFileInfoMapper">
+
+    <select id="selectByProjectNo" parameterType="list" resultType="com.bcsd.project.domain.vo.ZipVO">
+        SELECT
+        t1.url,
+        CONCAT_WS('/',CONCAT_WS('_',t1.project_no,t2.project_name),t1.type,t1.original_file_name) file_name
+        FROM `project_impl_file_info` t1
+        LEFT JOIN `project_impl_basic_info` t2 ON t1.project_no = t2.project_no
+        <where>
+            <if test="projectNos != null and projectNos.size()>0">
+                AND t1.project_no IN
+                <foreach collection="projectNos" item="projectNo" open="(" separator="," close=")">
+                    #{projectNo}
+                </foreach>
+            </if>
+            <if test="type !=null and type != ''">
+                AND t1.type = #{type}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

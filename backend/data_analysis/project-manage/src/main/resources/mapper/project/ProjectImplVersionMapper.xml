@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProjectImplVersionMapper">
+
+    <select id="selectNewData" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.* FROM
+        project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        WHERE t1.data_source = 0
+    </select>
+
+    <select id="selectNewOne" parameterType="string" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.* FROM
+        project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        WHERE t1.project_no = #{projectNo} LIMIT 1
+    </select>
+
+    <select id="selectGPData" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.id,t1.geography_position,t1.project_name,t1.build_status FROM
+        project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        WHERE t1.geography_position IS NOT NULL AND t1.data_source = 0
+    </select>
+
+    <select id="selectNewDataByBuildStatus" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.* FROM
+        project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        WHERE t1.build_status NOT IN(4,5) AND t1.data_source = 0
+    </select>
+
+    <select id="selectDataByYM" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.*,CONCAT_WS(',',t3.ancestors,t1.dept_id) dept_ids FROM project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        LEFT JOIN sys_dept t3 ON t1.dept_id = t3.dept_id
+        WHERE t1.data_source = 0
+        <if test="isCurrentYear==1">
+            AND FIND_IN_SET(#{year},t1.plan_year)
+        </if>
+        <if test="isCurrentYear==0">
+            AND !FIND_IN_SET(#{year},t1.plan_year)
+        </if>
+    </select>
+
+    <select id="selectNewDataByBuildStatusAndYear" parameterType="string" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.*,CONCAT_WS(',',t3.ancestors,t1.dept_id) dept_ids FROM project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        LEFT JOIN sys_dept t3 ON t1.dept_id = t3.dept_id
+        WHERE t1.build_status = 1 AND t1.data_source = 0 AND FIND_IN_SET(#{year},t1.plan_year)
+    </select>
+
+    <select id="selectNewDataByPlanYearAndDeptId" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.*,t3.year_plan_completed_invest,t3.current_scheduled_arrange_fund FROM project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        LEFT JOIN (SELECT project_no,SUM(CAST(IFNULL(year_plan_completed_invest,0) AS DECIMAL(20, 2))) year_plan_completed_invest,
+        SUM(CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2))) current_scheduled_arrange_fund
+        FROM project_plan_manage WHERE plan_year = #{planYear} GROUP BY project_no) t3 ON t1.project_no = t3.project_no
+        WHERE FIND_IN_SET(#{planYear},t1.plan_year) AND t1.dept_id = #{deptId} AND t1.data_source = 0
+    </select>
+
+    <select id="selectDataByYearAndCity" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t1.* FROM
+        project_impl_version t1
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) t2 ON t1.id = t2.id
+        <where>
+            <if test="planYears != null and planYears.size()>0 ">
+                <foreach collection="planYears" item="planYear" open="(" close=")" separator=" OR ">
+                    FIND_IN_SET(#{planYear}, t1.plan_year)
+                </foreach>
+            </if>
+            <if test="cityDistrict != null and cityDistrict != ''">
+                AND t1.city_district BETWEEN #{cityDistrict} AND #{cityDistrictEnd}
+            </if>
+            AND t1.data_source = 0
+        </where>
+    </select>
+
+    <select id="listPage" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT piv.* FROM project_impl_version piv
+        INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_no) t2 ON piv.id = t2.id
+        WHERE piv.delete_tag = 0
+        <if test="projectNo != null and projectNo != ''">
+            AND piv.project_no LIKE CONCAT('%',#{projectNo},'%')
+        </if>
+        <if test="projectName != null and projectName != ''">
+            AND piv.project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="deptId != null">
+            AND piv.dept_id IN(SELECT dept_id FROM sys_dept WHERE dept_id = #{deptId} OR FIND_IN_SET(#{deptId},ancestors))
+        </if>
+        ${params.dataScope}
+        ORDER BY piv.create_time DESC
+    </select>
+
+</mapper>

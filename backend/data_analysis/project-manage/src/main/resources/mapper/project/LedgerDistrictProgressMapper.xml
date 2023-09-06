@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.LedgerDistrictProgressMapper">
+
+    <select id="listPage" parameterType="com.bcsd.project.domain.LedgerDistrictProgress" resultType="com.bcsd.project.domain.LedgerDistrictProgress">
+        SELECT
+            t1.*
+        FROM ledger_district_progress t1
+        WHERE t1.delete_tag = 0
+        <if test="deptId != null">
+            AND t1.dept_id IN(SELECT dept_id FROM sys_dept WHERE dept_id = #{deptId} OR FIND_IN_SET(#{deptId},ancestors))
+        </if>
+        <if test="state != null and state != ''">
+            AND t1.state = #{state}
+        </if>
+        <if test="dataYear != null and dataYear != ''">
+            AND t1.data_year = #{dataYear}
+        </if>
+        <if test="dataWeek != null and dataWeek != ''">
+            AND t1.data_week = #{dataWeek}
+        </if>
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+        ORDER BY t1.data_year DESC,t1.data_week DESC,t1.state
+    </select>
+
+    <select id="selectNotCreateDistrict" parameterType="com.bcsd.project.domain.LedgerDistrictProgress" resultType="com.bcsd.project.domain.LedgerDistrictProgress">
+        SELECT
+            ppm.dept_id,
+            sd.city_code city_district
+        FROM project_plan_manage ppm
+        LEFT JOIN sys_dept sd ON ppm.dept_id = sd.dept_id
+        WHERE ppm.delete_tag = 0 AND ppm.plan_year = #{dataYear} AND ppm.dept_id NOT IN(SELECT dept_id FROM ledger_district_progress WHERE delete_tag = 0 AND data_year = #{dataYear} AND data_week = #{dataWeek})
+        GROUP BY ppm.dept_id
+    </select>
+
+    <select id="selectCreateDistrict" parameterType="com.bcsd.project.domain.LedgerDistrictProgress" resultType="com.bcsd.project.domain.LedgerDistrictProgress">
+        SELECT
+            pibi.dept_id,
+            sd.city_code city_district
+        FROM project_impl_basic_info pibi
+                 LEFT JOIN sys_dept sd ON pibi.dept_id = sd.dept_id
+        WHERE pibi.delete_tag = 0 AND FIND_IN_SET(#{dataYear},pibi.plan_year)
+        GROUP BY pibi.dept_id
+    </select>
+
+</mapper>

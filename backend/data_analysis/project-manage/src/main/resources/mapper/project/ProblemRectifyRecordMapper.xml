@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProblemRectifyRecordMapper">
+
+    <select id="listPage" resultType="com.bcsd.project.domain.ProblemRectifyRecord">
+        SELECT prr.*,pro.notice_name,pro.notice_file,su.nick_name user_name,
+        (SELECT GROUP_CONCAT(u.nick_name) FROM sys_user u WHERE FIND_IN_SET(u.user_id,prr.inform)) inform_name
+        FROM problem_rectify_record prr
+        LEFT JOIN problem_rectify_notice pro ON prr.notice_id = pro.id
+        LEFT JOIN sys_user su ON prr.user_id = su.user_id
+        WHERE prr.delete_tag = 0
+          <if test="noticeId != null">
+            AND prr.notice_id = #{noticeId}
+          </if>
+          <if test="projectName != null and projectName != ''">
+            AND prr.project_name LIKE CONCAT('%',#{projectName},'%')
+          </if>
+          <if test="projectNo != null and projectNo != ''">
+            AND prr.project_no = #{projectNo}
+          </if>
+          <if test="deptId != null">
+            AND prr.dept_id IN(SELECT dept_id FROM sys_dept WHERE dept_id = #{deptId} OR FIND_IN_SET(#{deptId},ancestors))
+          </if>
+          <if test="problemSource != null and problemSource != ''">
+              AND prr.problem_source = #{problemSource}
+          </if>
+          <if test="problemType != null and problemType != ''">
+              AND prr.problem_type = #{problemType}
+          </if>
+          <if test="problemLevel != null and problemLevel != ''">
+              AND prr.problem_level = #{problemLevel}
+          </if>
+          <if test="rectifyStatus != null and rectifyStatus != ''">
+              AND prr.rectify_status = #{rectifyStatus}
+          </if>
+          <if test="monitorTimeBegin != null">
+              AND prr.monitor_time BETWEEN #{monitorTimeBegin} AND #{monitorTimeEnd}
+          </if>
+          <if test="rectifyDeadlineBegin != null">
+              AND prr.rectify_deadline BETWEEN #{rectifyDeadlineBegin} AND #{rectifyDeadlineEnd}
+          </if>
+          <if test="rectifyTimeBegin != null">
+              AND prr.rectify_time BETWEEN #{rectifyTimeBegin} AND #{rectifyTimeEnd}
+          </if>
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+        ORDER BY prr.rectify_status,prr.dept_id,prr.monitor_time,prr.id
+    </select>
+
+    <select id="getById" parameterType="long" resultType="com.bcsd.project.domain.ProblemRectifyRecord">
+        SELECT prr.*,pro.notice_name,pro.notice_file,su.nick_name user_name,
+        (SELECT GROUP_CONCAT(u.nick_name) FROM sys_user u WHERE FIND_IN_SET(u.user_id,prr.inform)) inform_name
+        FROM problem_rectify_record prr
+        LEFT JOIN problem_rectify_notice pro ON prr.notice_id = pro.id
+        LEFT JOIN sys_user su ON prr.user_id = su.user_id
+        WHERE prr.delete_tag = 0 and prr.id = #{id}
+    </select>
+</mapper>

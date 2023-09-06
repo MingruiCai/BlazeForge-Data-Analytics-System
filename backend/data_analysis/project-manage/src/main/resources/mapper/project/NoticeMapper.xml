@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.NoticeMapper">
+
+    <select id="sendList" parameterType="com.bcsd.project.domain.Notice" resultType="com.bcsd.project.domain.Notice">
+        SELECT
+            n.id,n.title,n.status,n.create_by,n.create_time,
+            SUM(m.state) num,
+            COUNT(1) total
+        FROM notice n
+        LEFT JOIN notice_msg m ON n.id = m.notice_id
+        WHERE n.delete_tag = 0
+        <if test="roleKey != 'admin'">
+            AND n.dept_id = #{deptId} AND n.role_key = #{roleKey}
+        </if>
+        <if test="title != null and title != ''">
+            AND n.title LIKE concat('%', #{title}, '%')
+        </if>
+        GROUP BY n.id
+        ORDER BY n.status,n.create_time DESC
+    </select>
+
+    <select id="receiveList" parameterType="com.bcsd.project.domain.Notice" resultType="com.bcsd.project.domain.Notice">
+        SELECT n.id,n.title,n.create_by,n.create_time,m.state
+        FROM notice_msg m
+        LEFT JOIN notice n ON m.notice_id = n.id
+        WHERE n.delete_tag = 0 AND n.status = 1 AND m.user_id = #{userId}
+        <if test="title != null and title != ''">
+            AND n.title LIKE concat('%', #{title}, '%')
+        </if>
+        ORDER BY m.state,n.create_time DESC
+    </select>
+
+    <select id="receiveInfo" parameterType="com.bcsd.project.domain.Notice" resultType="com.bcsd.project.domain.Notice">
+        SELECT n.*,m.state,m.id AS msg_id
+        FROM notice_msg m
+        LEFT JOIN notice n ON m.notice_id = n.id
+        WHERE n.delete_tag = 0 AND m.user_id = #{userId} AND n.id = #{id}
+        GROUP BY n.id
+    </select>
+</mapper>

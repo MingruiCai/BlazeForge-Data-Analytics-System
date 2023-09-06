@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.SmsSendRecordMapper">
+
+    <select id="listPage" parameterType="com.bcsd.project.domain.SmsSendRecord" resultType="com.bcsd.project.domain.SmsSendRecord">
+        SELECT
+            t1.*,
+            t2.nick_name user_name,
+            t3.dept_name
+        FROM sms_send_record t1
+        LEFT JOIN sys_user t2 ON t1.user_id = t2.user_id
+        LEFT JOIN sys_dept t3 ON t2.dept_id = t3.dept_id
+        <where>
+            <if test="userName != null and userName != ''">
+                AND t2.user_name LIKE CONCAT('%',#{userName},'%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND t1.phone LIKE CONCAT('%',#{phone},'%')
+            </if>
+            <if test="status != null">
+                AND t1.status = #{status}
+            </if>
+            <if test="templateId != null and templateId !=''">
+                AND t1.template_id = #{templateId}
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(t1.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(t1.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+        </where>
+        ORDER BY t1.id DESC
+    </select>
+
+</mapper>

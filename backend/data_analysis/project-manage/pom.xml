@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>bcsd</artifactId>
+        <groupId>com.bcsd</groupId>
+        <version>0.0.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>project-manage</artifactId>
+
+    <description>
+        三峡后续工作年度项目管理一张图
+    </description>
+
+    <dependencies>
+        <!-- 通用工具-->
+        <dependency>
+            <groupId>com.bcsd</groupId>
+            <artifactId>bcsd-common</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.bcsd</groupId>
+            <artifactId>bcsd-system</artifactId>
+        </dependency>
+
+        <!--短信-->
+        <dependency>
+            <groupId>cn.com.flaginfo.sdk.cmc</groupId>
+            <artifactId>send-api-sdk</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15to18</artifactId>
+            <version>1.67</version>
+        </dependency>
+    </dependencies>
+
+</project>

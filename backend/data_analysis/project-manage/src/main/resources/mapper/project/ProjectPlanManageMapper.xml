@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProjectPlanManageMapper">
+
+    <select id="listPage" parameterType="com.bcsd.project.domain.ProjectPlanManage" resultType="com.bcsd.project.domain.ProjectPlanManage">
+        SELECT
+        ppm.*,
+        IF(ppm.batch=1,'提前批','第二批') batch_name,
+        prl.apply_special_capital_total,
+        u.nick_name user_name,
+        CASE ppm.state
+        <choose>
+            <when test='params.roleKey == "quxiantianbao" or params.roleKey == "shijitianbao" or params.roleKey == "shengjitianbao"'>
+                WHEN '-1' THEN 1
+                WHEN '-2' THEN 2
+            </when>
+            <when test='params.roleKey == "quxian"'>
+                WHEN '1' THEN 1
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "shiji"'>
+                WHEN '2' THEN 1
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "sanfang"'>
+                WHEN '3' THEN 1
+                WHEN '2' THEN 2
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "shengji"'>
+                WHEN '4' THEN 1
+                WHEN '3' THEN 2
+                WHEN '2' THEN 2
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "sanxiasisanfang"'>
+                WHEN '5' THEN 1
+                WHEN '4' THEN 2
+                WHEN '3' THEN 2
+                WHEN '2' THEN 2
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <otherwise>
+                WHEN '1' THEN 1
+                WHEN '2' THEN 1
+                WHEN '3' THEN 1
+                WHEN '4' THEN 1
+                WHEN '5' THEN 1
+                WHEN '-1' THEN 2
+            </otherwise>
+        </choose>
+        WHEN '0' THEN 6
+        WHEN '-4' THEN 7
+        WHEN '-3' THEN 8
+        ELSE 3 END i
+        FROM project_plan_manage ppm
+        LEFT JOIN project_roll_library prl ON ppm.roll_library_id = prl.id
+        LEFT JOIN sys_user u ON ppm.user_id = u.user_id
+        WHERE ppm.`delete_tag` = 0
+        <if test="state != null and state != ''">
+            AND ppm.state = #{state}
+        </if>
+        <if test="ratingLevel != null and ratingLevel != ''">
+            AND ppm.rating_level = #{ratingLevel}
+        </if>
+        <if test="projectTotalInvestMin != null">
+            AND (ppm.project_total_invest BETWEEN #{projectTotalInvestMin} AND #{projectTotalInvestMax})
+        </if>
+        <if test="projectNo != null and projectNo != ''">
+            AND ppm.project_no LIKE CONCAT('%',#{projectNo},'%')
+        </if>
+        <if test="projectName != null and projectName != ''">
+            AND ppm.project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="deptId != null">
+            AND ppm.dept_id IN(SELECT dept_id FROM sys_dept WHERE dept_id = #{deptId} OR FIND_IN_SET(#{deptId},ancestors))
+        </if>
+        <if test="batch != null">
+            AND ppm.batch = #{batch}
+        </if>
+        <if test="batch != null">
+            AND ppm.batch = #{batch}
+        </if>
+        <if test="projectType != null and projectType != ''">
+            AND ppm.project_type = #{projectType}
+        </if>
+        <if test="planYear != null">
+            AND ppm.plan_year = #{planYear}
+        </if>
+        <if test="type145 != null and type145 != ''">
+            AND (ppm.type_145 BETWEEN #{type145} AND #{type145End})
+        </if>
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+        ORDER BY i,ppm.state DESC,ppm.update_time DESC
+    </select>
+
+    <select id="getFundGb145AndYear" resultType="map">
+        SELECT
+            pdi.name,
+            ppm.`year`,
+            SUM(CAST(ppm.fund AS DECIMAL(20, 2))) fund
+        FROM(
+            SELECT CONCAT(LEFT(type_145,4),'0000') type_145,plan_year `year`,current_scheduled_arrange_fund fund FROM project_plan_manage
+            WHERE delete_tag = 0 AND plan_year > 2020 AND type_145 IS NOT NULL) ppm
+            LEFT JOIN project_dict_info pdi ON pdi.id = ppm.type_145 AND pdi.pid = '03000000'
+        GROUP BY ppm.type_145,ppm.`year`
+    </select>
+
+    <select id="getFundGbQXAndYear" resultType="map">
+        SELECT
+            CONCAT_WS('-',t1.scope_region,SUBSTRING_INDEX(t2.ancestors,',',-1),t1.dept_id) `name`,
+            t1.plan_year `year`,
+            SUM(IFNULL(CAST(t1.current_scheduled_arrange_fund AS DECIMAL(20, 2)),0)) fund
+        FROM project_plan_manage t1
+                 LEFT JOIN sys_dept t2 ON t1.dept_id = t2.dept_id
+        WHERE t1.delete_tag = 0 AND t1.plan_year > 2020 AND t1.scope_region IS NOT NULL
+        GROUP BY t1.scope_region,t1.dept_id,t1.plan_year
+    </select>
+
+    <select id="selectByDeptIdAndPlanYear" parameterType="com.bcsd.project.domain.ProjectPlanManage" resultType="com.bcsd.project.domain.ProjectPlanManage">
+        SELECT
+            dept_id,
+            city_district,
+            project_name,
+            project_legal_person,
+            project_type,
+            project_total_invest,
+            MAX(scheduled_arrange_fund) scheduled_arrange_fund,
+            MAX(year_plan_completed_invest) year_plan_completed_invest,
+            SUM(CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2))) current_scheduled_arrange_fund
+        FROM `project_plan_manage` WHERE delete_tag = 0 AND dept_id = #{deptId} AND plan_year = #{planYear}
+        GROUP BY project_no
+    </select>
+
+</mapper>

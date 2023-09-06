@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.LedgerDistrictProgressLogMapper">
+
+    <select id="selectByLDPId" parameterType="long" resultType="map">
+        SELECT
+            CONCAT_WS('(',create_by,CONCAT(step,')')) u,
+            DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s' ) t,
+            description n,
+            `type` s
+        FROM ledger_district_progress_log
+        WHERE ledger_district_progress_id = #{id}
+        ORDER BY create_time,`type`
+    </select>
+
+</mapper>

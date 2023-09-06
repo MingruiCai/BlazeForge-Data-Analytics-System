@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProjectImplInfoSnapshotMapper">
+
+    <select id="getDataByYear" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t3.* FROM
+        project_impl_info_snapshot t1
+        INNER JOIN(SELECT MAX(id) AS id FROM project_impl_info_snapshot
+        <where>
+            <if test="year != null and year != ''">
+                AND data_year &lt;= #{year}
+            </if>
+            <if test="month != null and month != ''">
+                AND data_month &lt;= #{month}
+            </if>
+        </where>
+        GROUP BY project_no) t2 ON t1.id = t2.id
+        LEFT JOIN `project_impl_version` t3 ON t1.version_id = t3.id
+        <where>
+            <if test="planYears != null and planYears.size()>0 ">
+                <foreach collection="planYears" item="planYear" open="(" close=")" separator=" OR ">
+                    LOCATE(#{planYear}, t1.plan_year) > 0
+                </foreach>
+            </if>
+            <choose>
+                <when test="timeScope == 1 and projectType == 1">
+                    AND t1.first_arrange_fund_year = #{year}
+                </when>
+                <when test="timeScope == 1 and projectType == 2">
+                    AND t1.first_arrange_fund_year != #{year}
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <select id="selectData" resultType="com.bcsd.project.domain.ProjectImplVersion">
+        SELECT t3.* FROM
+        project_impl_info_snapshot t1
+        INNER JOIN(SELECT MAX(id) AS id FROM project_impl_info_snapshot
+        <where>
+            <if test="year != null and year != ''">
+                AND data_year &lt;= #{year}
+            </if>
+            <if test="month != null and month != ''">
+                AND data_month &lt;= #{month}
+            </if>
+        </where>
+        GROUP BY project_no) t2 ON t1.id = t2.id
+        LEFT JOIN `project_impl_version` t3 ON t1.version_id = t3.id
+        <where>
+            <if test="planYears != null and planYears.size()>0 ">
+                <foreach collection="planYears" item="planYear" open="(" close=")" separator=" OR ">
+                    LOCATE(#{planYear}, t1.plan_year) > 0
+                </foreach>
+            </if>
+            <if test="cityDistrict != null and cityDistrict != ''">
+                AND t1.city_district BETWEEN #{cityDistrict} AND #{cityDistrictEnd}
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.CommonMapper">
+
+    <select id="selectDByUserId" parameterType="long" resultType="map">
+        SELECT CONVERT(t1.id,CHAR) id,CONCAT('【',t7.begin_year,'-',t7.end_year,'】',t1.project_name) `name`,'项目库申报待审核' typeDesc,1 `type`,1 workType,CONCAT_WS(',',t7.begin_year,t7.end_year) remark
+        FROM project_roll_library t1
+             LEFT JOIN sys_dict_data t2 ON t1.state = t2.dict_value AND t2.dict_type = 'project_library_state'
+             LEFT JOIN sys_dept t3 ON t1.dept_id = t3.dept_id
+             LEFT JOIN sys_role t4 ON FIND_IN_SET(t4.role_key,t2.remark)
+             LEFT JOIN sys_user_role t5 ON t4.role_id = t5.role_id
+             INNER JOIN sys_user t6 ON t5.user_id = t6.user_id AND (t1.dept_id = t6.dept_id OR FIND_IN_SET(t6.dept_id,CONCAT(t3.ancestors,',10',',11',',130')))
+             LEFT JOIN project_roll_cycle t7 ON t1.roll_cycle_id = t7.id
+        WHERE t1.delete_tag = 0 AND t1.state >0 AND t5.user_id = #{userId}
+        UNION ALL
+        SELECT CONVERT(t1.id,CHAR) id,CONCAT('【',t2.begin_year,'-',t2.end_year,'】',t1.project_name) `name`,'项目库申报驳回待处理' typeDesc,2 `type`,1 workType,CONCAT_WS(',',t2.begin_year,t2.end_year) remark
+        FROM project_roll_library t1
+        LEFT JOIN project_roll_cycle t2 ON t1.roll_cycle_id = t2.id
+        WHERE t1.delete_tag = 0 AND t1.state = '-1' AND t1.user_id = #{userId}
+        UNION ALL
+        SELECT CONVERT(t1.id,CHAR) id,CONCAT('【',t1.plan_year,'】',t1.project_name) `name`,'计划申报待审核' typeDesc,1 `type`,2 workType,'' remark
+        FROM project_plan_manage t1
+             LEFT JOIN sys_dict_data t2 ON t1.state = t2.dict_value AND t2.dict_type = 'project_plan_state'
+             LEFT JOIN sys_dept t3 ON t1.dept_id = t3.dept_id
+             LEFT JOIN sys_role t4 ON FIND_IN_SET(t4.role_key,t2.remark)
+             LEFT JOIN sys_user_role t5 ON t4.role_id = t5.role_id
+             INNER JOIN sys_user t6 ON t5.user_id = t6.user_id AND (t1.dept_id = t6.dept_id OR FIND_IN_SET(t6.dept_id,CONCAT(t3.ancestors,',10',',11',',130')))
+        WHERE t1.delete_tag = 0 AND t1.state >0 AND t5.user_id = #{userId}
+        UNION ALL
+        SELECT CONVERT(t1.id,CHAR) id,CONCAT('【',t1.plan_year,'】',t1.project_name) `name`,'计划申报驳回待处理' typeDesc,2 `type`,2 workType,'' remark
+        FROM project_plan_manage t1 WHERE t1.delete_tag = 0 AND t1.state = '-1' AND t1.user_id = #{userId}
+        UNION ALL
+        SELECT
+            CONVERT(id,CHAR) id,problem_content `name`,'整改待处理' typeDesc,1 `type`,3 workType,'' remark
+        FROM `problem_rectify_record`
+        WHERE delete_tag = 0 AND rectify_status = 'dzg' AND user_id = #{userId}
+        UNION ALL
+        SELECT CONVERT(t1.id,CHAR) id,t1.project_name `name`,'项目实施待审核' typeDesc,1 `type`,4 workType,CONCAT('{"statusProject":"',t1.project_status,'"}') remark
+        FROM project_impl_basic_info t1
+             LEFT JOIN sys_dict_data t2 ON t1.project_status = t2.dict_value AND t2.dict_type = 'project_impl_state'
+             LEFT JOIN sys_dept t3 ON t1.dept_id = t3.dept_id
+             LEFT JOIN sys_role t4 ON FIND_IN_SET(t4.role_key,t2.remark)
+             LEFT JOIN sys_user_role t5 ON t4.role_id = t5.role_id
+             INNER JOIN sys_user t6 ON t5.user_id = t6.user_id AND (t1.dept_id = t6.dept_id OR FIND_IN_SET(t6.dept_id,CONCAT(t3.ancestors,',10',',11',',130')))
+        WHERE t1.delete_tag = 0 AND t1.project_status >0 AND t5.user_id = #{userId}
+        UNION ALL
+        SELECT CONVERT(t1.id,CHAR) id,t1.project_name `name`,'项目实施驳回待处理' typeDesc,2 `type`,4 workType,CONCAT('{"statusProject":"',t1.project_status,'"}') remark
+        FROM project_impl_basic_info t1
+        WHERE t1.delete_tag = 0 AND t1.project_status = '-1' AND t1.user_id = #{userId}
+        UNION ALL
+        SELECT CONVERT(t2.id,CHAR) id,t2.title `name`,'通知待阅读' typeDesc,1 `type`,5 workType,'' remark
+        FROM `notice_msg` t1
+        LEFT JOIN `notice` t2 ON t1.`notice_id` = t2.`id`
+        WHERE t2.delete_tag = 0 AND t2.status = 1 AND t1.state = 0 AND t1.user_id = #{userId}
+    </select>
+
+</mapper>

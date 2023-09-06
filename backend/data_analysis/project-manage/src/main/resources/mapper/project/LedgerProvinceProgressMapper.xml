@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.LedgerProvinceProgressMapper">
+
+    <select id="listPage" parameterType="com.bcsd.project.domain.LedgerProvinceProgress" resultType="com.bcsd.project.domain.LedgerProvinceProgress">
+        SELECT
+        t1.*
+        FROM `ledger_province_progress` t1
+        WHERE t1.delete_tag = 0
+        <if test="dataYear != null and dataYear != ''">
+            AND t1.data_year = #{dataYear}
+        </if>
+        <if test="dataWeek != null and dataWeek != ''">
+            AND t1.data_week = #{dataWeek}
+        </if>
+        ORDER BY t1.update_time DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProjectRollLibraryMapper">
+
+    <select id="listPage" resultType="com.bcsd.project.domain.ProjectRollLibrary">
+        SELECT
+        t1.*,
+        IFNULL(t2.plan_final_issue_fund,0) plan_final_issue_fund,
+        t3.nick_name user_name,
+        CASE t1.state
+        <choose>
+            <when test='params.roleKey == "quxiantianbao" or params.roleKey == "shijitianbao" or params.roleKey == "shengjitianbao"'>
+                WHEN '-1' THEN 1
+                WHEN '-2' THEN 2
+            </when>
+            <when test='params.roleKey == "quxian"'>
+                WHEN '1' THEN 1
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "shiji"'>
+                WHEN '2' THEN 1
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "sanfang"'>
+                WHEN '3' THEN 1
+                WHEN '2' THEN 2
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "shengji"'>
+                WHEN '4' THEN 1
+                WHEN '3' THEN 2
+                WHEN '2' THEN 2
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <when test='params.roleKey == "sanxiasisanfang"'>
+                WHEN '5' THEN 1
+                WHEN '4' THEN 2
+                WHEN '3' THEN 2
+                WHEN '2' THEN 2
+                WHEN '1' THEN 2
+                WHEN '-1' THEN 4
+                WHEN '-2' THEN 5
+            </when>
+            <otherwise>
+                WHEN '1' THEN 1
+                WHEN '2' THEN 1
+                WHEN '3' THEN 1
+                WHEN '4' THEN 1
+                WHEN '5' THEN 1
+                WHEN '-1' THEN 2
+            </otherwise>
+        </choose>
+        WHEN '0' THEN 6
+        WHEN '-3' THEN 7
+        ELSE 3 END i
+        FROM `project_roll_library` t1
+        LEFT JOIN(SELECT project_no,CAST(IFNULL(scheduled_arrange_fund,0) AS DECIMAL(20, 2))+CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2)) AS plan_final_issue_fund
+        FROM project_plan_manage WHERE id IN(SELECT MAX(id) FROM project_plan_manage GROUP BY project_no)) t2 ON t1.project_no = t2.project_no
+        LEFT JOIN sys_user t3 ON t1.user_id = t3.user_id
+        WHERE t1.delete_tag = 0
+        <if test="rollCycleId != null">
+            AND t1.roll_cycle_id = #{rollCycleId}
+        </if>
+        <if test="projectNo != null and projectNo != ''">
+            AND t1.project_no LIKE CONCAT('%',#{projectNo},'%')
+        </if>
+        <if test="projectName != null and projectName != ''">
+            AND t1.project_name LIKE CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="deptId != null">
+            AND t1.dept_id IN(SELECT dept_id FROM sys_dept WHERE dept_id = #{deptId} OR FIND_IN_SET(#{deptId},ancestors))
+        </if>
+        <if test="state != null and state != ''">
+            AND t1.state = #{state}
+        </if>
+        <if test="applyCostType != null and applyCostType != ''">
+            AND t1.apply_cost_type = #{applyCostType}
+        </if>
+        <if test="projectType != null and projectType !=''">
+            AND t1.project_type = #{projectType}
+        </if>
+        <if test="earlyWorkDepth != null and earlyWorkDepth !=''">
+            AND t1.early_work_depth = #{earlyWorkDepth}
+        </if>
+        <if test="type145 != null and type145 != ''">
+            AND (t1.type_145 BETWEEN #{type145} AND #{type145End})
+        </if>
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+        ORDER BY i,t1.state DESC,t1.update_time DESC
+    </select>
+
+    <select id="selectByPN" resultType="map">
+        SELECT
+        CONVERT(prl.id,CHAR) id,
+        CONCAT('【',prc.begin_year,'-',prc.end_year,'】',prl.project_name) AS `name`
+        FROM project_roll_library prl
+        LEFT JOIN project_roll_cycle prc ON prl.roll_cycle_id = prc.id
+        WHERE prl.delete_tag = 0 AND prl.roll_cycle_id != #{rollCycleId}
+        AND prl.project_name LIKE CONCAT('%',#{projectName},'%')
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+    </select>
+
+    <select id="statisticsGbQx" resultType="com.bcsd.project.domain.vo.ProjectRollLibrarySummaryVO" parameterType="long">
+        SELECT
+            t1.scope_region `name`,
+            CONCAT_WS(',',t3.ancestors,t1.dept_id) dept_id,
+            SUM(1) project_num,
+            SUM(IF(t1.project_type='新报',1,0)) project_type_1,
+            SUM(IF(t1.project_type='续报',1,0)) project_type_2,
+            SUM(IF(t1.project_type='延续',1,0)) project_type_3,
+            SUM(IF(t1.project_type='续建',1,0)) project_type_4,
+            SUM(CAST(IFNULL(t1.project_total_invest,0) AS DECIMAL(20, 2))) project_total_invest,
+            SUM(CAST(IFNULL(t1.apply_special_capital_total,0) AS DECIMAL(20, 2))) apply_special_capital_total,
+            SUM(CAST(IFNULL(t2.fund,0) AS DECIMAL(19, 2))) plan_final_issue_fund,
+            SUM(CAST(IFNULL(t1.apply_special_capital_subtotal,0) AS DECIMAL(20, 2))) apply_special_capital_subtotal,
+            SUM(CAST(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',1) AS DECIMAL(20, 2))) apply_special_capital_1,
+            SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',2),',',-1) AS DECIMAL(20, 2))) apply_special_capital_2,
+            SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',3),',',-1) AS DECIMAL(20, 2))) apply_special_capital_3
+        FROM project_roll_library t1
+        LEFT JOIN(SELECT project_no,CAST(IFNULL(scheduled_arrange_fund,0) AS DECIMAL(20, 2))+CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2)) AS fund
+        FROM project_plan_manage WHERE id IN(SELECT MAX(id) FROM project_plan_manage GROUP BY project_no)) t2 ON t1.project_no = t2.project_no
+        LEFT JOIN  sys_dept t3 ON t1.dept_id = t3.dept_id
+        WHERE t1.delete_tag = 0 AND t1.scope_region IS NOT NULL AND t1.roll_cycle_id = #{id}
+        <if test="state != null and state != ''">
+            AND t1.state = #{state}
+        </if>
+        GROUP BY t1.scope_region,t1.dept_id
+    </select>
+
+    <select id="statisticsGb145" resultType="map" parameterType="long">
+        SELECT * FROM(
+             SELECT
+                 IFNULL(t2.name,'合计') type145,
+                 SUM(1) projectNum,
+                 SUM(IF(t1.project_type='新报',1,0)) projectType1,
+                 SUM(IF(t1.project_type='续报',1,0)) projectType2,
+                 SUM(IF(t1.project_type='延续',1,0)) projectType3,
+                 SUM(IF(t1.project_type='续建',1,0)) projectType4,
+                 SUM(CAST(IFNULL(t1.project_total_invest,0) AS DECIMAL(20, 2))) projectTotalInvest,
+                 SUM(CAST(IFNULL(t1.apply_special_capital_total,0) AS DECIMAL(20, 2))) applySpecialCapitalTotal,
+                 SUM(CAST(IFNULL(t3.fund,0) AS DECIMAL(20, 2))) planFinalIssueFund,
+                 SUM(CAST(IFNULL(t1.apply_special_capital_subtotal,0) AS DECIMAL(20, 2))) applySpecialCapitalSubtotal,
+                 SUM(CAST(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',1) AS DECIMAL(20, 2))) applySpecialCapital1,
+                 SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',2),',',-1) AS DECIMAL(20, 2))) applySpecialCapital2,
+                 SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',3),',',-1) AS DECIMAL(20, 2))) applySpecialCapital3
+             FROM (SELECT *,CONCAT(LEFT(type_145,4),'0000') type_145_1 FROM project_roll_library WHERE delete_tag = 0 AND type_145 IS NOT NULL AND roll_cycle_id = #{id}
+                    <if test="state != null and state != ''">
+                        AND state = #{state}
+                    </if>
+             ) t1
+             LEFT JOIN project_dict_info t2 ON t1.type_145_1 = t2.id
+             LEFT JOIN(SELECT project_no,CAST(IFNULL(scheduled_arrange_fund,0) AS DECIMAL(20, 2))+CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2)) AS fund
+             FROM project_plan_manage WHERE id IN(SELECT MAX(id) FROM project_plan_manage GROUP BY project_no)) t3 ON t1.project_no = t3.project_no
+             GROUP BY t2.name WITH ROLLUP) t
+        ORDER BY t.projectNum DESC
+    </select>
+
+    <select id="statisticsNumAndFund" parameterType="long" resultType="map">
+        SELECT
+            SUM(1) applyNum,
+            SUM(CAST(IFNULL(apply_special_capital_total,0) AS DECIMAL(20, 2))) applyTotal,
+            SUM(IF(state = 0,1,0)) assertNum,
+            SUM(IF(state = 0,CAST(IFNULL(apply_special_capital_total,0) AS DECIMAL(20, 2)),0)) assertTotal
+        FROM `project_roll_library` WHERE delete_tag = 0
+        <if test="rollCycleId != null">
+            AND roll_cycle_id = #{rollCycleId}
+        </if>
+    </select>
+
+    <select id="statisticsGbType" parameterType="long" resultType="map">
+        SELECT * FROM(
+         SELECT
+             CASE t1.project_category WHEN 1 THEN '工程建设类' WHEN 0 THEN '非工程建设类' ELSE '合计' END  `name`,
+             SUM(1) projectNum,
+             SUM(IF(t1.project_type='新报',1,0)) projectType1,
+             SUM(IF(t1.project_type='续报',1,0)) projectType2,
+             SUM(IF(t1.project_type='延续',1,0)) projectType3,
+             SUM(IF(t1.project_type='续建',1,0)) projectType4,
+             SUM(CAST(IFNULL(t1.project_total_invest,0) AS DECIMAL(20, 2))) projectTotalInvest,
+             SUM(CAST(IFNULL(t1.apply_special_capital_total,0) AS DECIMAL(20, 2))) applySpecialCapitalTotal,
+             SUM(CAST(IFNULL(t2.fund,0) AS DECIMAL(20, 2))) planFinalIssueFund,
+             SUM(CAST(IFNULL(t1.apply_special_capital_subtotal,0) AS DECIMAL(20, 2))) applySpecialCapitalSubtotal,
+             SUM(CAST(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',1) AS DECIMAL(20, 2))) applySpecialCapital1,
+             SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',2),',',-1) AS DECIMAL(20, 2))) applySpecialCapital2,
+             SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',3),',',-1) AS DECIMAL(20, 2))) applySpecialCapital3
+         FROM project_roll_library t1
+         LEFT JOIN(SELECT project_no,CAST(IFNULL(scheduled_arrange_fund,0) AS DECIMAL(20, 2))+CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2)) AS fund
+         FROM project_plan_manage WHERE id IN(SELECT MAX(id) FROM project_plan_manage GROUP BY project_no)) t2 ON t1.project_no = t2.project_no
+         WHERE t1.delete_tag = 0 AND t1.project_category IS NOT NULL AND t1.roll_cycle_id = #{id}
+         <if test="state != null and state != ''">
+            AND t1.state = #{state}
+         </if>
+         GROUP BY t1.project_category WITH ROLLUP) t ORDER BY t.name
+    </select>
+
+    <select id="statisticsGbPlan" parameterType="long" resultType="map">
+        SELECT * FROM(
+             SELECT
+                 CASE t1.plan WHEN 1 THEN '已安排计划' WHEN 0 THEN '未安排计划' ELSE '合计' END  `name`,
+                 SUM(1) projectNum,
+                 SUM(IF(t1.project_type='新报',1,0)) projectType1,
+                 SUM(IF(t1.project_type='续报',1,0)) projectType2,
+                 SUM(IF(t1.project_type='延续',1,0)) projectType3,
+                 SUM(IF(t1.project_type='续建',1,0)) projectType4,
+                 SUM(CAST(IFNULL(t1.project_total_invest,0) AS DECIMAL(20, 2))) projectTotalInvest,
+                 SUM(CAST(IFNULL(t1.apply_special_capital_total,0) AS DECIMAL(20, 2))) applySpecialCapitalTotal,
+                 SUM(CAST(IFNULL(t2.fund,0) AS DECIMAL(20, 2))) planFinalIssueFund,
+                 SUM(CAST(IFNULL(t1.apply_special_capital_subtotal,0) AS DECIMAL(20, 2))) applySpecialCapitalSubtotal,
+                 SUM(CAST(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',1) AS DECIMAL(20, 2))) applySpecialCapital1,
+                 SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',2),',',-1) AS DECIMAL(20, 2))) applySpecialCapital2,
+                 SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',3),',',-1) AS DECIMAL(20, 2))) applySpecialCapital3
+             FROM (SELECT *,IF(project_no IS NULL,0,1) plan FROM project_roll_library) t1
+             LEFT JOIN(SELECT project_no,CAST(IFNULL(scheduled_arrange_fund,0) AS DECIMAL(20, 2))+CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2)) AS fund
+             FROM project_plan_manage WHERE id IN(SELECT MAX(id) FROM project_plan_manage GROUP BY project_no)) t2 ON t1.project_no = t2.project_no
+             WHERE t1.delete_tag = 0 AND t1.project_category IS NOT NULL AND t1.roll_cycle_id = #{id}
+             <if test="state != null and state != ''">
+                AND t1.state = #{state}
+             </if>
+             GROUP BY t1.plan WITH ROLLUP) t
+        ORDER BY t.name
+    </select>
+
+    <select id="statisticsGbBuildStatus" parameterType="long" resultType="map">
+        SELECT * FROM(
+         SELECT
+             CASE t3.build_status
+                 WHEN '1' THEN '未开工'
+                 WHEN '2' THEN '在建'
+                 WHEN '3' THEN '完建'
+                 WHEN '4' THEN '验收'
+                 WHEN '5' THEN '取消'
+                 ELSE '合计' END  `name`,
+             SUM(1) projectNum,
+             SUM(IF(t1.project_type='新报',1,0)) projectType1,
+             SUM(IF(t1.project_type='续报',1,0)) projectType2,
+             SUM(IF(t1.project_type='延续',1,0)) projectType3,
+             SUM(IF(t1.project_type='续建',1,0)) projectType4,
+             SUM(CAST(IFNULL(t1.project_total_invest,0) AS DECIMAL(20, 2))) projectTotalInvest,
+             SUM(CAST(IFNULL(t1.apply_special_capital_total,0) AS DECIMAL(20, 2))) applySpecialCapitalTotal,
+             SUM(CAST(IFNULL(t2.fund,0) AS DECIMAL(20, 2))) planFinalIssueFund,
+             SUM(CAST(IFNULL(t1.apply_special_capital_subtotal,0) AS DECIMAL(20, 2))) applySpecialCapitalSubtotal,
+             SUM(CAST(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',1) AS DECIMAL(20, 2))) applySpecialCapital1,
+             SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',2),',',-1) AS DECIMAL(20, 2))) applySpecialCapital2,
+             SUM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(CONCAT(IFNULL(t1.apply_special_capital,'0'),',0',',0'),',',3),',',-1) AS DECIMAL(20, 2))) applySpecialCapital3
+         FROM (SELECT *,IF(project_no IS NULL,0,1) plan FROM project_roll_library) t1
+         LEFT JOIN(SELECT project_no,CAST(IFNULL(scheduled_arrange_fund,0) AS DECIMAL(20, 2))+CAST(IFNULL(current_scheduled_arrange_fund,0) AS DECIMAL(20, 2)) AS fund
+         FROM project_plan_manage WHERE id IN(SELECT MAX(id) FROM project_plan_manage GROUP BY project_no)) t2 ON t1.project_no = t2.project_no
+         LEFT JOIN (SELECT a.* FROM project_impl_version a
+         INNER JOIN (SELECT MAX(id) AS id FROM project_impl_version GROUP BY project_id) b ON a.id = b.id) t3 ON t1.project_no = t3.project_no
+         WHERE t1.delete_tag = 0 AND t1.project_no IS NOT NULL AND t3.build_status IS NOT NULL AND t1.roll_cycle_id = #{id}
+         <if test="state != null and state != ''">
+            AND t1.state = #{state}
+         </if>
+         GROUP BY t3.build_status WITH ROLLUP) t
+        ORDER BY t.projectNum DESC,t.name
+    </select>
+</mapper>

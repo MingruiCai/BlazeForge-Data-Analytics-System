@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bcsd.project.mapper.ProjectPlanYearManageMapper">
+
+    <select id="getMaxPlanYear" resultType="integer">
+        SELECT MAX(plan_year) FROM `project_plan_year_manage` WHERE delete_tag = 0
+    </select>
+
+</mapper>
