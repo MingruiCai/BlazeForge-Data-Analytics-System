@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bcsd.project.mapper.lyInventoryMapper" >
+  <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyInventory" >
+    <id column="id" property="id"/>
+    <result column="podTypCode" property="podTypCode"/>
+    <result column="dateLastInv" property="dateLastInv"/>
+    <result column="totalQty" property="totalQty"/>
+    <result column="dateLastRm" property="dateLastRm"/>
+    <result column="toNumLastMov" property="toNumLastMov"/>
+    <result column="blkReaText" property="blkReaText"/>
+    <result column="operType" property="operType"/>
+    <result column="batchAttr08" property="batchAttr08"/>
+    <result column="batchAttr07" property="batchAttr07"/>
+    <result column="podCode" property="podCode"/>
+    <result column="batchAttr09" property="batchAttr09"/>
+    <result column="qualityStatus" property="qualityStatus"/>
+    <result column="availableQty" property="availableQty"/>
+    <result column="containerTypeCode" property="containerTypeCode"/>
+    <result column="inStockInterval" property="inStockInterval"/>
+    <result column="matUnit" property="matUnit"/>
+    <result column="boxFlag" property="boxFlag"/>
+    <result column="boxCode" property="boxCode"/>
+    <result column="boxFlagText" property="boxFlagText"/>
+    <result column="outBlkUserFlag" property="outBlkUserFlag"/>
+    <result column="stgTypText" property="stgTypText"/>
+    <result column="stgBinTypCode" property="stgBinTypCode"/>
+    <result column="batchAttr11" property="batchAttr11"/>
+    <result column="batchAttr10" property="batchAttr10"/>
+    <result column="priority" property="priority"/>
+    <result column="batchAttr15" property="batchAttr15"/>
+    <result column="batchAttr14" property="batchAttr14"/>
+    <result column="pickNum" property="pickNum"/>
+    <result column="batchAttr13" property="batchAttr13"/>
+    <result column="batchAttr12" property="batchAttr12"/>
+    <result column="desBinCode" property="desBinCode"/>
+    <result column="binName" property="binName"/>
+    <result column="weiUnit" property="weiUnit"/>
+    <result column="sequence" property="sequence"/>
+    <result column="realAvailableQty" property="realAvailableQty"/>
+    <result column="whCode" property="whCode"/>
+    <result column="blkUser" property="blkUser"/>
+    <result column="dateLastPm" property="dateLastPm"/>
+    <result column="berthAlias" property="berthAlias"/>
+    <result column="invFlagText" property="invFlagText"/>
+    <result column="matText" property="matText"/>
+    <result column="toItemLastMov" property="toItemLastMov"/>
+    <result column="invFlag" property="invFlag"/>
+    <result column="stockStr1" property="stockStr1"/>
+    <result column="intoBlkUserFlagText" property="intoBlkUserFlagText"/>
+    <result column="stockStr2" property="stockStr2"/>
+    <result column="dateGen" property="dateGen"/>
+    <result column="ownerCode" property="ownerCode"/>
+    <result column="outStockInterval" property="outStockInterval"/>
+    <result column="podTypText" property="podTypText"/>
+    <result column="matAdjustFlag" property="matAdjustFlag"/>
+    <result column="stockStr3" property="stockStr3"/>
+    <result column="matAdjustFlagText" property="matAdjustFlagText"/>
+    <result column="stockStr4" property="stockStr4"/>
+    <result column="stockStr5" property="stockStr5"/>
+    <result column="layer" property="layer"/>
+    <result column="adjustQty" property="adjustQty"/>
+    <result column="stockStr6" property="stockStr6"/>
+    <result column="blkReaCode" property="blkReaCode"/>
+    <result column="packFormat" property="packFormat"/>
+    <result column="ownerName" property="ownerName"/>
+    <result column="stkCode" property="stkCode"/>
+    <result column="matWei" property="matWei"/>
+    <result column="qualityStatusText" property="qualityStatusText"/>
+    <result column="wmsBatchNum" property="wmsBatchNum"/>
+    <result column="mapName" property="mapName"/>
+    <result column="direction" property="direction"/>
+    <result column="channelCode" property="channelCode"/>
+    <result column="directionTex" property="directionTex"/>
+    <result column="dateExpire" property="dateExpire"/>
+    <result column="binCode" property="binCode"/>
+    <result column="batchNum" property="batchNum"/>
+    <result column="outBlkUserFlagText" property="outBlkUserFlagText"/>
+    <result column="whText" property="whText"/>
+    <result column="binUtilization" property="binUtilization"/>
+    <result column="traceCode" property="traceCode"/>
+    <result column="seqCode" property="seqCode"/>
+    <result column="dateExpireFlag" property="dateExpireFlag"/>
+    <result column="blkReaType" property="blkReaType"/>
+    <result column="dateInto" property="dateInto"/>
+    <result column="stgTypCode" property="stgTypCode"/>
+    <result column="dateLastMov" property="dateLastMov"/>
+    <result column="matCode" property="matCode"/>
+    <result column="hotIndex" property="hotIndex"/>
+    <result column="containerTypeName" property="containerTypeName"/>
+    <result column="create_by" property="createBy"/>
+    <result column="create_time" property="createTime"/>
+    <result column="update_by" property="updateBy"/>
+    <result column="update_time" property="updateTime"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, ownerCode, podTypCode, dateLastInv, totalQty, dateLastRm, toNumLastMov, blkReaText, 
+    operType, batchAttr08, batchAttr07, podCode, batchAttr09, qualityStatus, availableQty, 
+    containerTypeCode, inStockInterval, matUnit, boxFlag, boxCode, boxFlagText, outBlkUserFlag, 
+    stgTypText, stgBinTypCode, batchAttr11, batchAttr10, priority, batchAttr15, batchAttr14, 
+    pickNum, batchAttr13, batchAttr12, desBinCode, binName, weiUnit, sequence, realAvailableQty, 
+    whCode, blkUser, dateLastPm, berthAlias, invFlagText, matText, toItemLastMov, invFlag, 
+    stockStr1, intoBlkUserFlagText, stockStr2, dateGen, outStockInterval, podTypText, 
+    matAdjustFlag, stockStr3, matAdjustFlagText, stockStr4, stockStr5, layer, adjustQty, 
+    stockStr6, blkReaCode, packFormat, ownerName, stkCode, matWei, qualityStatusText, 
+    wmsBatchNum, mapName, direction, channelCode, directionTex, dateExpire, binCode, 
+    batchNum, outBlkUserFlagText, whText, binUtilization, traceCode, seqCode, dateExpireFlag, 
+    blkReaType, dateInto, stgTypCode, dateLastMov, matCode, hotIndex, containerTypeName, 
+    create_by, create_time, update_by, update_time
+  </sql>
+
+  <select id="getAssembledList" resultType="map" parameterType="com.bcsd.project.domain.lyInventory">
+    SELECT matCode,matText,totalQty,availableQty,batchAttr07 FROM ly_inventory where 1=1
+    <if test="batchAttr07s != null and batchAttr07s.size > 0">
+      and batchAttr07 in
+      <foreach collection="batchAttr07s" item="batchAttr" open="(" separator="," close=")">
+        #{batchAttr}
+      </foreach>
+    </if>
+    <if test="matCode != null and matCode != ''">
+      and matCode LIKE CONCAT('%',#{matCode},'%')
+    </if>
+    <if test="matText != null and matText != ''">
+      and matText LIKE CONCAT('%',#{matText},'%')
+    </if>
+  </select>
+
+  <select id="getCount" resultType="map" parameterType="com.bcsd.project.domain.lyInventory">
+    SELECT count(totalQty) AS totalQtyAll,count(availableQty) AS availableQtyAll FROM ly_inventory WHERE batchAttr07 is not null AND batchAttr07 != ''
+    <if test="batchAttr07s != null and batchAttr07s.size > 0">
+      and batchAttr07 in
+      <foreach collection="batchAttr07s" item="batchAttr" open="(" separator="," close=")">
+      #{batchAttr}
+    </foreach>
+    </if>
+    <if test="matCode != null and matCode != ''">
+      and matCode LIKE CONCAT('%',#{matCode},'%')
+    </if>
+    <if test="matText != null and matText != ''">
+      and matText LIKE CONCAT('%',#{matText},'%')
+    </if>
+  </select>
+
+
+  <select id="selectByStkCode" resultMap="BaseResultMap" parameterType="com.bcsd.project.domain.lyInventory">
+    select * from ly_inventory where stkCode = #{stkCode}
+  </select>
+</mapper>

@@ -162,3 +162,6 @@ sms:
   spCode: 214596
   appKey: hbsl_sxhx
   appSecret: b2c81c07ea82dc4fe39a2df3768ff53f
+
+http:
+  url: http://10.40.88.24:9192/dataview/api/

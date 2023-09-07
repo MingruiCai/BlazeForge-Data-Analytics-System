@@ -38,6 +38,7 @@ public class BaseInfo {
     private Date updateTime;
 
     /** 备注 */
+    @TableField(exist = false)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String remark;
 

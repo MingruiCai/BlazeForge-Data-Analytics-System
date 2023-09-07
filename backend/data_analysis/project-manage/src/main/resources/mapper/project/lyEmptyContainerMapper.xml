@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bcsd.project.mapper.lyEmptyContainerMapper" >
+  <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyEmptyContainer" >
+    <id column="id" property="id"/>
+    <result column="podTypCode" property="podTypCode"/>
+    <result column="podStr8" property="podStr8"/>
+    <result column="intoBlkUserFlagText" property="intoBlkUserFlagText"/>
+    <result column="agvFlag" property="agvFlag"/>
+    <result column="emptyPodFlag" property="emptyPodFlag"/>
+    <result column="podStr4" property="podStr4"/>
+    <result column="podStr5" property="podStr5"/>
+    <result column="podStr6" property="podStr6"/>
+    <result column="podStr7" property="podStr7"/>
+    <result column="podTypText" property="podTypText"/>
+    <result column="podStr1" property="podStr1"/>
+    <result column="blkReaText" property="blkReaText"/>
+    <result column="initStatus" property="initStatus"/>
+    <result column="podStr2" property="podStr2"/>
+    <result column="berthCode" property="berthCode"/>
+    <result column="podStr3" property="podStr3"/>
+    <result column="podLayout" property="podLayout"/>
+    <result column="layer" property="layer"/>
+    <result column="blkReaCode" property="blkReaCode"/>
+    <result column="podCode" property="podCode"/>
+    <result column="cooY" property="cooY"/>
+    <result column="cooX" property="cooX"/>
+    <result column="mapName" property="mapName"/>
+    <result column="podText" property="podText"/>
+    <result column="distanceWb" property="distanceWb"/>
+    <result column="agvFlagText" property="agvFlagText"/>
+    <result column="stgTypText" property="stgTypText"/>
+    <result column="outBlkUserFlag" property="outBlkUserFlag"/>
+    <result column="middle" property="middle"/>
+    <result column="batchAttrValue" property="batchAttrValue"/>
+    <result column="podIntoTempLockText" property="podIntoTempLockText"/>
+    <result column="outBlkUserFlagText" property="outBlkUserFlagText"/>
+    <result column="emptyBinCount" property="emptyBinCount"/>
+    <result column="whText" property="whText"/>
+    <result column="binUtilization" property="binUtilization"/>
+    <result column="initStatusText" property="initStatusText"/>
+    <result column="whCode" property="whCode"/>
+    <result column="intoBlkUserFlag" property="intoBlkUserFlag"/>
+    <result column="blkUser" property="blkUser"/>
+    <result column="berthAlias" property="berthAlias"/>
+    <result column="podIntoTempLock" property="podIntoTempLock"/>
+    <result column="stgTypCode" property="stgTypCode"/>
+    <result column="hotIndex" property="hotIndex"/>
+    <result column="mapCode" property="mapCode"/>
+    <result column="podWei" property="podWei"/>
+    <result column="create_by" property="createBy"/>
+    <result column="create_time" property="createTime"/>
+    <result column="update_by" property="updateBy"/>
+    <result column="update_time" property="updateTime"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, podTypCode, podStr8, intoBlkUserFlagText, agvFlag, emptyPodFlag, podStr4, podStr5, 
+    podStr6, podStr7, podTypText, podStr1, blkReaText, initStatus, podStr2, berthCode, 
+    podStr3, podLayout, layer, blkReaCode, podCode, cooY, cooX, mapName, podText, distanceWb, 
+    agvFlagText, stgTypText, outBlkUserFlag, middle, batchAttrValue, podIntoTempLockText, 
+    outBlkUserFlagText, emptyBinCount, whText, binUtilization, initStatusText, whCode, 
+    intoBlkUserFlag, blkUser, berthAlias, podIntoTempLock, stgTypCode, hotIndex, mapCode, 
+    podWei, create_by, create_time, update_by, update_time
+  </sql>
+
+  <select id="getList" resultType="com.bcsd.project.domain.vo.lyEmptyContainerVO" parameterType="com.bcsd.project.domain.lyEmptyContainer">
+    select podTypText,podCode,initStatusText,berthCode,binUtilization from ly_empty_container where 1=1
+    <if test="podCodes != null and podCodes.size > 0">
+      and podCode in
+      <foreach collection="PodCodes" item="podCode" open="(" separator="," close=")">
+        #{podCode}
+      </foreach>
+    </if>
+  </select>
+
+  <select id="selectByPodCode" resultMap="BaseResultMap" parameterType="com.bcsd.project.domain.lyEmptyContainer">
+    select * from ly_empty_container where podCode = #{podCode}
+  </select>
+
+
+</mapper>

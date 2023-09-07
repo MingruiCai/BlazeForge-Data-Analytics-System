@@ -87,5 +87,17 @@ public class Constants
     public static final int NOTICE_STATUS_0 = 0;
     public static final int NOTICE_STATUS_1 = 1;
 
+    /**
+     * 空容器统计状态
+     */
+    public static final String BA = "BA";
+    public static final String BB = "BB";
+    public static final String BC = "BC";
+    public static final String BD = "BD";
+    public static final String BE = "BE";
+    public static final String BF = "BF";
+    public static final String BG = "BG";
+    public static final String BH = "BH";
+
 
 }
