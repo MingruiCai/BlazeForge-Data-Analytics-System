@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bcsd.project.mapper.lyRequirementMapper">
+    <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyRequirement" >
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="date" property="date" jdbcType="TIMESTAMP"/>
+        <result column="quantity" property="quantity" jdbcType="INTEGER"/>
+        <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_by" property="updateBy" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , code, date, quantity, create_by, create_time, update_by, update_time
+    </sql>
+    <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold" parameterType="java.lang.Long">
+        select b.*,
+               a.matText as color,
+        from ly_requirement b
+                 left join ly_inventory a on b.code = a.matCode
+        where b.id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from ly_requirement
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.bcsd.project.domain.lyRequirement">
+        insert into ly_requirement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="date != null">
+                date,
+            </if>
+            <if test="quantity != null">
+                quantity,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="date != null">
+                #{date,jdbcType=TIMESTAMP},
+            </if>
+            <if test="quantity != null">
+                #{quantity,jdbcType=INTEGER},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.bcsd.project.domain.lyRequirement">
+        update ly_requirement
+        <set>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="date != null">
+                date = #{date,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lowerLimit != null">
+                quantity = #{quantity,jdbcType=INTEGER},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="selectRequirementList" parameterType="com.bcsd.project.domain.lyRequirement" resultType="com.bcsd.project.domain.lyRequirement">
+        select b.*,
+        a.matText as color,
+        from ly_requirement b
+        left join ly_requirement a on b.code = a.matCode
+        where 1 = 1
+        <if test="code != null and code !=''" >
+            and b.code = #{code,jdbcType=VARCHAR}
+        </if>
+        <if test="date != null and color !=''" >
+            and b.date = #{date,jdbcType=TIMESTAMP}
+        </if>
+        ORDER BY b.date
+    </select>
+</mapper>

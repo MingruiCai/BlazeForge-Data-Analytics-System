@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bcsd.project.mapper.lyInventoryThresholdMapper">
+    <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyInventoryThreshold" >
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+<!--        <result column="color" property="color" jdbcType="VARCHAR"/>-->
+        <result column="upper_limit" property="upperLimit" jdbcType="INTEGER"/>
+        <result column="lower_limit" property="lowerLimit" jdbcType="INTEGER"/>
+        <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_by" property="updateBy" jdbcType="VARCHAR"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , code, upper_limit, lower_limit, create_by, create_time, update_by, update_time
+    </sql>
+    <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold" parameterType="java.lang.Long">
+        select b.*,
+               a.matText as color,
+        from ly_inventory_threshold b
+                 left join ly_inventory a on b.code = a.matCode
+        where b.id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from ly_inventory_threshold
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.bcsd.project.domain.lyInventoryThreshold">
+        insert into ly_inventory_threshold
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="upperLimit != null">
+                upper_limit,
+            </if>
+            <if test="lowerLimit != null">
+                lower_limit,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=BIGINT},
+            </if>
+            <if test="upperLimit != null">
+                #{upperLimit,jdbcType=INTEGER},
+            </if>
+            <if test="lowerLimit != null">
+                #{lowerLimit,jdbcType=INTEGER},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.bcsd.project.domain.lyInventoryThreshold">
+        update ly_inventory_threshold
+        <set>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="upperLimit != null">
+                upper_limit = #{upperLimit,jdbcType=INTEGER},
+            </if>
+            <if test="lowerLimit != null">
+                lower_limit = #{lowerLimit,jdbcType=INTEGER},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="selectInventoryThresholdList" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
+        select b.*,
+        a.matText as color,
+        from ly_inventory_threshold b
+        left join ly_inventory a on b.code = a.matCode
+        where 1 = 1
+        <if test="code != null and code !=''" >
+            and code = #{code,jdbcType=VARCHAR}
+        </if>
+        <if test="color != null and color !=''" >
+            and color = #{color,jdbcType=VARCHAR}
+        </if>
+        ORDER BY update_time
+    </select>
+</mapper>

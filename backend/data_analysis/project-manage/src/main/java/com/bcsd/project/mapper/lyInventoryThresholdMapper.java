@@ -16,4 +16,10 @@ public interface lyInventoryThresholdMapper {
     List<lyInventoryThreshold> selectInventoryThresholdList(lyInventoryThreshold inventoryThreshold);
     int insertSelective(lyInventoryThreshold record);
     int updateByPrimaryKeySelective(lyInventoryThreshold record);
+    int deleteByPrimaryKey(Long id);
+
+    lyInventoryThreshold selectByPrimaryKey(Long id);
+
+
+
 }

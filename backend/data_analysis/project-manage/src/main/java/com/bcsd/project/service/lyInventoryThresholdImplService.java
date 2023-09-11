@@ -1,5 +1,6 @@
 package com.bcsd.project.service;
 
+import com.bcsd.common.core.domain.AjaxResult;
 import com.bcsd.project.domain.lyInventoryThreshold;
 import com.bcsd.project.domain.lyInventoryThreshold;
 //import com.bcsd.project.domain.vo.ThirdSession;
@@ -17,6 +18,7 @@ import static com.bcsd.common.utils.SecurityUtils.*;
 
 /**
  * 用药咨询
+ *
  * @ClassName InventoryThresholdServiceImpl
  * @Description: TODO
  * @Author Mingrui
@@ -28,17 +30,26 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
 
     @Autowired
     private lyInventoryThresholdMapper inventoryThresholdMapper;
-    @Override
-    public List<lyInventoryThreshold> list(lyInventoryThreshold lyinventoryThreshold) {
 
-        return inventoryThresholdMapper.selectInventoryThresholdList(lyinventoryThreshold);
+    /**
+     * 列表
+     * @param inventoryThreshold
+     */
+    @Override
+    public List<lyInventoryThreshold> list(lyInventoryThreshold inventoryThreshold) {
+
+        return inventoryThresholdMapper.selectInventoryThresholdList(inventoryThreshold);
 
     }
 
+    /**
+     * 新增更新
+     * @param inventoryThreshold
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addOrUpdate(lyInventoryThreshold inventoryThreshold) {
-        if (inventoryThreshold.getId()!=null) {
+        if (inventoryThreshold.getId() != null) {
             inventoryThreshold.setUpdateBy(getUsername());
             inventoryThreshold.setUpdateTime(new Date());
             inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
@@ -49,5 +60,25 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
         }
     }
 
+    /**
+     * 删除
+     * @param id
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult delete(Long id) {
+        inventoryThresholdMapper.deleteByPrimaryKey(id);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 根据ID查询
+     * @param id
+     * @return inventoryThreshold
+     */
+    @Override
+    public lyInventoryThreshold selectByPrimaryKey(Long id) {
+        return inventoryThresholdMapper.selectByPrimaryKey(id);
+    }
 }
 

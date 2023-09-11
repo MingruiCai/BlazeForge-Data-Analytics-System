@@ -2,8 +2,11 @@ package com.bcsd.project.domain;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.bcsd.common.core.domain.BaseInfo;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.Date;
 
 /**
  * 零件库存阈值信息
@@ -11,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("ly_inventory_threshold")
-public class lyInventoryThreshold extends BaseInfo {
+public class lyRequirement extends BaseInfo {
     /**
      * 零件号
      */
@@ -21,12 +24,13 @@ public class lyInventoryThreshold extends BaseInfo {
      */
     private String color;
     /**
-     * 库存上限数量
+     * 计划日期
      */
-    private Integer upperLimit;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date date;
     /**
-     * 库存下限数量
+     * 计划发货数量
      */
-    private Integer lowerLimit;
+    private Integer quantity;
 
 }
