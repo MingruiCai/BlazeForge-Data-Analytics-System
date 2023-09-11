@@ -9,11 +9,11 @@ import lombok.EqualsAndHashCode;
 import java.util.Date;
 
 /**
- * 零件库存阈值信息
+ * 需求计划设置信息
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("ly_inventory_threshold")
+@TableName("ly_requirement")
 public class lyRequirement extends BaseInfo {
     /**
      * 零件号

@@ -4,8 +4,8 @@ import com.alibaba.fastjson2.JSONObject;
 import com.bcsd.common.core.controller.BaseController;
 import com.bcsd.common.core.domain.AjaxResult;
 import com.bcsd.common.core.page.TableDataInfo;
-import com.bcsd.project.domain.lyRequirement;
-import com.bcsd.project.service.lyRequirementService;
+import com.bcsd.project.domain.lyThresholdManagement;
+import com.bcsd.project.service.lyThresholdManagementService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,41 +17,41 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * @ClassName 需求计划设置 lyRequirementController
+ * @ClassName 统计阈值管理 lyThresholdManagementController
  * @Description: TODO
  * @Author Mingrui
- * @Date 2023/9/8
+ * @Date 2023/9/11
  * @Version V1.0
  **/
 @Slf4j
 @RestController
-@RequestMapping("/lyRequirement")
-public class lyRequirementController extends BaseController{
+@RequestMapping("/lyThresholdManagement")
+public class lyThresholdManagementController extends BaseController{
 
     @Autowired
-    private lyRequirementService requirementService;
+    private lyThresholdManagementService thresholdManagementService;
 
     /**
      * 列表分页
-     * @param requirement
+     * @param thresholdManagement
      * @return
      */
     @ApiOperation("查看需求分页")
     @PostMapping("/list")
-    public TableDataInfo list(@RequestBody lyRequirement requirement) {
-        startPage(requirement);
-        List<lyRequirement> list= requirementService.list(requirement);
+    public TableDataInfo list(@RequestBody lyThresholdManagement thresholdManagement) {
+        startPage(thresholdManagement);
+        List<lyThresholdManagement> list= thresholdManagementService.list(thresholdManagement);
         return getDataTable(list);
     }
     /**
      * 新增修改
-     * @param requirement
+     * @param thresholdManagement
      * @return
      */
     @ApiOperation("新增或修改需求计划")
     @PostMapping("/addOrUpdate")
-    public AjaxResult addOrUpdate(@RequestBody lyRequirement requirement) {
-        requirementService.addOrUpdate(requirement);
+    public AjaxResult addOrUpdate(@RequestBody lyThresholdManagement thresholdManagement) {
+        thresholdManagementService.addOrUpdate(thresholdManagement);
         return AjaxResult.success();
     }
     /**
@@ -62,7 +62,7 @@ public class lyRequirementController extends BaseController{
     @ApiOperation("删除需求计划")
     @PostMapping({"/delete"})
     public AjaxResult delete(@RequestBody JSONObject jsonObject) {
-        return requirementService.delete(jsonObject.getLong("id"));
+        return thresholdManagementService.delete(jsonObject.getLong("id"));
     }
     /**
      * 根据id查询
@@ -72,8 +72,8 @@ public class lyRequirementController extends BaseController{
     @ApiOperation("根据id查询")
     @PostMapping({"/getById"})
     public AjaxResult getById(@RequestBody JSONObject jsonObject) {
-        lyRequirement requirement=requirementService.selectByPrimaryKey(jsonObject.getLong("id"));
-        return AjaxResult.success(requirement);
+        lyThresholdManagement thresholdManagement=thresholdManagementService.selectByPrimaryKey(jsonObject.getLong("id"));
+        return AjaxResult.success(thresholdManagement);
     }
 
 }

@@ -3,6 +3,7 @@ package com.bcsd.project.mapper;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.bcsd.project.domain.lyInventory;
+import com.bcsd.project.domain.vo.InventoryGapsNumberVO;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -25,4 +26,11 @@ public interface lyInventoryMapper extends BaseMapper<lyInventory> {
     Map<String,Object> getCount(lyInventory params);
 
     lyInventory selectByStkCode(lyInventory params);
+
+    List<Map<String,Object>> inventoryAlarmCount(lyInventory params);
+
+    List<InventoryGapsNumberVO> getGapsNumber(lyInventory params);
+
+    int updProcessingStatus(JSONObject params);
+
 }

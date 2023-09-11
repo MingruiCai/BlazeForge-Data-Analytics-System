@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.bcsd.project.mapper.lyInventoryThresholdMapper">
-    <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyInventoryThreshold" >
+<mapper namespace="com.bcsd.project.mapper.lyThresholdManagementMapper">
+    <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyThresholdManagement" >
         <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="code" property="code" jdbcType="VARCHAR"/>
-<!--        <result column="color" property="color" jdbcType="VARCHAR"/>-->
+        <result column="status" property="status" jdbcType="CHAR"/>
         <result column="upper_limit" property="upperLimit" jdbcType="INTEGER"/>
         <result column="lower_limit" property="lowerLimit" jdbcType="INTEGER"/>
         <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
@@ -14,29 +16,36 @@
     </resultMap>
     <sql id="Base_Column_List">
         id
-        , code, upper_limit, lower_limit, create_by, create_time, update_by, update_time
+        type, name, code, status, upper_limit, lower_limit, create_by, create_time, update_by, update_time
     </sql>
-    <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold" parameterType="java.lang.Long">
-        select b.*,
-               a.matText as color,
-        from ly_inventory_threshold b
-                 left join ly_inventory a on b.code = a.matCode
-        where b.id = #{id,jdbcType=BIGINT}
+    <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyThresholdManagement" parameterType="java.lang.Long">
+        select *
+        from ly_threshold_management
+        where id = #{id,jdbcType=BIGINT}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete
-        from ly_inventory_threshold
+        from ly_threshold_management
         where id = #{id,jdbcType=BIGINT}
     </delete>
-    <insert id="insertSelective" parameterType="com.bcsd.project.domain.lyInventoryThreshold">
-        insert into ly_inventory_threshold
+    <insert id="insertSelective" parameterType="com.bcsd.project.domain.lyThresholdManagement">
+        insert into ly_threshold_management
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
                 id,
             </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
             <if test="code != null">
                 code,
+            </if>
+            <if test="status != null">
+                status,
             </if>
             <if test="upperLimit != null">
                 upper_limit,
@@ -61,8 +70,17 @@
             <if test="id != null">
                 #{id,jdbcType=BIGINT},
             </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
             <if test="code != null">
-                #{code,jdbcType=BIGINT},
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=CHAR},
             </if>
             <if test="upperLimit != null">
                 #{upperLimit,jdbcType=INTEGER},
@@ -85,11 +103,20 @@
         </trim>
     </insert>
 
-    <update id="updateByPrimaryKeySelective" parameterType="com.bcsd.project.domain.lyInventoryThreshold">
-        update ly_inventory_threshold
+    <update id="updateByPrimaryKeySelective" parameterType="com.bcsd.project.domain.lyThresholdManagement">
+        update ly_threshold_management
         <set>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
             <if test="code != null">
                 code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=CHAR},
             </if>
             <if test="upperLimit != null">
                 upper_limit = #{upperLimit,jdbcType=INTEGER},
@@ -113,18 +140,16 @@
         where id = #{id,jdbcType=BIGINT}
     </update>
 
-    <select id="selectInventoryThresholdList" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
-        select b.*,
-        a.matText as color,
-        from ly_inventory_threshold b
-        left join ly_inventory a on b.code = a.matCode
-        where 1 = 1
-        <if test="code != null and code !=''" >
-            and code = #{code,jdbcType=VARCHAR}
-        </if>
-        <if test="color != null and color !=''" >
-            and color = #{color,jdbcType=VARCHAR}
-        </if>
-        ORDER BY update_time desc
+    <select id="selectThresholdManagementList" parameterType="com.bcsd.project.domain.lyThresholdManagement" resultType="com.bcsd.project.domain.lyThresholdManagement">
+        select *
+        from ly_threshold_management
+<!--        where 1 = 1-->
+<!--        <if test="code != null and code !=''" >-->
+<!--            and b.code = #{code,jdbcType=VARCHAR}-->
+<!--        </if>-->
+<!--        <if test="date != null and color !=''" >-->
+<!--            and b.date = #{date,jdbcType=TIMESTAMP}-->
+<!--        </if>-->
+        ORDER BY update_time desc 
     </select>
 </mapper>

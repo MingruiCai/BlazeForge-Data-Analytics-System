@@ -1,16 +1,10 @@
 package com.bcsd.project.mapper;
 
 import com.bcsd.project.domain.lyInventoryThreshold;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-/**
- * @ClassName InventoryThresholdMapper
- * @Description: TODO
- * @Author Mingrui
- * @Date 2023/9/6
- * @Version V1.0
- **/
 public interface lyInventoryThresholdMapper {
 
     List<lyInventoryThreshold> selectInventoryThresholdList(lyInventoryThreshold inventoryThreshold);
@@ -20,6 +14,7 @@ public interface lyInventoryThresholdMapper {
 
     lyInventoryThreshold selectByPrimaryKey(Long id);
 
-
+    @Select("select * from ly_inventory_threshold")
+    List<lyInventoryThreshold> getList();
 
 }

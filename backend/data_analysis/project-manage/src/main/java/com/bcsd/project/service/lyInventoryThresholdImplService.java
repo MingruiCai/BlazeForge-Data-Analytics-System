@@ -17,9 +17,9 @@ import java.util.List;
 import static com.bcsd.common.utils.SecurityUtils.*;
 
 /**
- * 用药咨询
+ * 零件库存阈值实现类
  *
- * @ClassName InventoryThresholdServiceImpl
+ * @ClassName lyInventoryThresholdServiceImpl
  * @Description: TODO
  * @Author Mingrui
  * @Date 2023/9/6

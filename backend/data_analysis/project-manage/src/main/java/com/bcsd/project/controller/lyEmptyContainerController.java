@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -82,6 +83,16 @@ public class lyEmptyContainerController extends BaseController {
     public TableDataInfo list(@RequestBody lyEmptyContainer params){
         startPage(params);
         return getDataTable(emptyContainerImplService.listPage(params));
+    }
+
+    /**
+     * 空容器统计列表统计
+     * @param params
+     * @return
+     */
+    @PostMapping("/getListCount")
+    public Map<String,Object> getListCount(@RequestBody lyEmptyContainer params){
+        return emptyContainerImplService.getListCount(params);
     }
 
     /**

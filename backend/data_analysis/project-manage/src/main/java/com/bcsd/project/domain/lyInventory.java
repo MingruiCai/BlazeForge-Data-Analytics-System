@@ -330,6 +330,17 @@ public class lyInventory extends BaseInfo {
     @TableField("containerTypeName")
     private String containerTypeName;
 
+    @ApiModelProperty(value = "库存状态（0：正常，1：低下限告警，2：超上限告警）")
+    @TableField("inventoryStatus")
+    private Integer inventoryStatus;
+
+    @ApiModelProperty(value = "缺口处理状态（0：无需处理，1：未处理，2：已处理）")
+    @TableField("processingStatus")
+    private Integer processingStatus;
+
     @TableField(exist = false)
     private List<String> batchAttr07s;
+
+    @TableField(exist = false)
+    private String date;
 }

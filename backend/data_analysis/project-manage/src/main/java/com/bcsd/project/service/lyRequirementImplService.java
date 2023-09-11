@@ -14,12 +14,12 @@ import java.util.List;
 import static com.bcsd.common.utils.SecurityUtils.getUsername;
 
 /**
- * 用药咨询
+ * 需求管理设置实现类
  *
- * @ClassName InventoryThresholdServiceImpl
+ * @ClassName lyRequirementServiceImpl
  * @Description: TODO
  * @Author Mingrui
- * @Date 2023/9/6
+ * @Date 2023/9/8
  **/
 @Slf4j
 @Service
@@ -35,7 +35,7 @@ public class lyRequirementImplService implements lyRequirementService {
     @Override
     public List<lyRequirement> list(lyRequirement requirement) {
 
-        return requirementMapper.selectInventoryThresholdList(requirement);
+        return requirementMapper.selectRequirementList(requirement);
 
     }
 
@@ -67,11 +67,10 @@ public class lyRequirementImplService implements lyRequirementService {
         requirementMapper.deleteByPrimaryKey(id);
         return AjaxResult.success();
     }
-
     /**
      * 根据ID查询
      * @param id
-     * @return inventoryThreshold
+     * @return
      */
     @Override
     public lyRequirement selectByPrimaryKey(Long id) {

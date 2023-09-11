@@ -182,6 +182,14 @@ public class lyEmptyContainer extends BaseInfo {
     @TableField("podWei")
     private String podWei;
 
+    @ApiModelProperty(value = "总仓位数")
+    @TableField("totalCount")
+    private Integer totalCount;
+
+    @ApiModelProperty(value = "空仓位数")
+    @TableField("podTypeCount")
+    private Integer podTypeCount;
+
     @TableField(exist = false)
-    private List<String> podCodes;
+    private List<String> podTypTexts;
 }

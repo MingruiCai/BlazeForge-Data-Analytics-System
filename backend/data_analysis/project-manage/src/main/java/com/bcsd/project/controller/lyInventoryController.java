@@ -119,13 +119,56 @@ public class lyInventoryController extends BaseController {
     }
 
     /**
-     * 获取详情
+     * 零件库存告警统计列表
+     * @param params
+     * @return
      */
-//    @PostMapping("/info/{id}")
-//    public AjaxResult getInfo(@PathVariable("id") Long id){
-//        return success(inventoryImplService.getInfo(id));
-//    }
+    @PostMapping("/inventoryAlarmList")
+    public TableDataInfo inventoryAlarmList(@RequestBody lyInventory params){
+        startPage(params);
+        return getDataTable(inventoryImplService.inventoryAlarmCount(params));
+    }
 
+    /**
+     * 零件库存告警统计导出
+     *
+     * @param response
+     * @param
+     */
+    @PostMapping(value = "/excelDownload3")
+    public void excelDownload3(HttpServletRequest request, HttpServletResponse response, lyInventory params) {
+        inventoryImplService.excelDownload3(response,request,params);
+    }
 
+    /**
+     * 零件计划缺口统计列表
+     * @param params
+     * @return
+     */
+    @PostMapping("/getGapsNumberList")
+    public TableDataInfo getGapsNumberList(@RequestBody lyInventory params){
+        startPage(params);
+        return getDataTable(inventoryImplService.getGapsNumber(params));
+    }
+
+    /**
+     * 零件计划缺口统计导出
+     *
+     * @param response
+     * @param
+     */
+    @PostMapping(value = "/excelDownload4")
+    public void excelDownload4(HttpServletRequest request, HttpServletResponse response, lyInventory params) {
+        inventoryImplService.excelDownload4(response,request,params);
+    }
+
+    /**
+     * 零件计划缺口统计修改状态
+     * @param params
+     */
+    @PostMapping(value = "/updProcessingStatus")
+    public void updProcessingStatus(@RequestBody JSONObject params) {
+        inventoryImplService.updProcessingStatus(params,getUsername());
+    }
 
 }

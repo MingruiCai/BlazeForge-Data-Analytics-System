@@ -48,6 +48,8 @@
     <result column="hotIndex" property="hotIndex"/>
     <result column="mapCode" property="mapCode"/>
     <result column="podWei" property="podWei"/>
+    <result column="totalCount" property="totalCount"/>
+    <result column="podTypeCount" property="podTypeCount"/>
     <result column="create_by" property="createBy"/>
     <result column="create_time" property="createTime"/>
     <result column="update_by" property="updateBy"/>
@@ -60,16 +62,36 @@
     agvFlagText, stgTypText, outBlkUserFlag, middle, batchAttrValue, podIntoTempLockText, 
     outBlkUserFlagText, emptyBinCount, whText, binUtilization, initStatusText, whCode, 
     intoBlkUserFlag, blkUser, berthAlias, podIntoTempLock, stgTypCode, hotIndex, mapCode, 
-    podWei, create_by, create_time, update_by, update_time
+    podWei,podTypeCount,totalCount, create_by, create_time, update_by, update_time
   </sql>
+
+  <select id="getContainerCount" resultType="map">
+    SELECT podTypText,SUM(podTypeCount) AS podTypeCount,SUM(totalCount) AS totalCount FROM ly_empty_container GROUP BY podTypText ORDER BY podTypText
+  </select>
 
   <select id="getList" resultType="com.bcsd.project.domain.vo.lyEmptyContainerVO" parameterType="com.bcsd.project.domain.lyEmptyContainer">
     select podTypText,podCode,initStatusText,berthCode,binUtilization from ly_empty_container where 1=1
-    <if test="podCodes != null and podCodes.size > 0">
-      and podCode in
-      <foreach collection="PodCodes" item="podCode" open="(" separator="," close=")">
-        #{podCode}
+    <if test="podTypTexts != null and podTypTexts.size > 0">
+      and podTypText in
+      <foreach collection="podTypTexts" item="podTypText" open="(" separator="," close=")">
+        #{podTypText}
       </foreach>
+    </if>
+    <if test="podTypeCount != null">
+      and podTypeCount = #{podTypeCount}
+    </if>
+  </select>
+
+  <select id="getListCount" resultType="map" parameterType="com.bcsd.project.domain.lyEmptyContainer">
+    select SUM(podTypeCount) AS podTypeCount,SUM(totalCount) AS totalCount from ly_empty_container where 1=1
+    <if test="podTypTexts != null and podTypTexts.size > 0">
+      and podTypText in
+      <foreach collection="podTypTexts" item="podTypText" open="(" separator="," close=")">
+        #{podTypText}
+      </foreach>
+    </if>
+    <if test="podTypeCount != null">
+      and podTypeCount = #{podTypeCount}
     </if>
   </select>
 

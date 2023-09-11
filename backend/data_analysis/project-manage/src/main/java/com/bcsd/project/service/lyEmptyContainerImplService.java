@@ -16,6 +16,7 @@ import com.bcsd.project.domain.vo.lyEmptyContainerVO;
 import com.bcsd.project.mapper.lyEmptyContainerMapper;
 import com.bcsd.project.mapper.lyInventoryMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,11 +117,12 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
         String data = jsonObject2.getString("data");
         List <lyEmptyContainer> entityList = JSON.parseArray(data,lyEmptyContainer.class);
         for (lyEmptyContainer param : entityList) {
-            /*LambdaQueryWrapper<lyEmptyContainer> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(lyEmptyContainer::getPodCode, param.getPodCode());
-            lyEmptyContainer emptyContainer = baseMapper.selectOne(wrapper);*/
+            String[] split = param.getBinUtilization().split("/");
+            param.setTotalCount(Integer.parseInt(split[1]));
+            param.setPodTypeCount(Integer.parseInt(split[0]));
             lyEmptyContainer emptyContainer = baseMapper.selectByPodCode(param);
             if(ObjectUtils.isNotEmpty(emptyContainer)){
+                BeanUtils.copyProperties(emptyContainer,param);
                 baseMapper.updateById(emptyContainer);
                 break;
             }
@@ -140,6 +142,9 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
         //数据转换
         Date curDate = DateUtils.getNowDate();
         for (lyEmptyContainer inventory : data) {
+            String[] split = inventory.getBinUtilization().split("/");
+            inventory.setTotalCount(Integer.parseInt(split[1]));
+            inventory.setPodTypeCount(Integer.parseInt(split[0]));
             inventory.setCreateTime(curDate);
             inventory.setCreateBy(userName);
             log.error(""+inventory.getPodCode());
@@ -154,6 +159,12 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
      * @return
      */
     public List<Map<String, Object>> getContainerCount(){
+        List<Map<String, Object>> list = baseMapper.getContainerCount();
+        //List<Map<String, Object>> list = new ArrayList();
+        for (Map<String, Object> objectMap : list) {
+            objectMap.put("percentage",String.format("%.2f", ((Double.valueOf(objectMap.get("podTypeCount").toString()) / Double.valueOf(objectMap.get("totalCount").toString())) * 100)));
+        }
+        /*
         List<lyEmptyContainerVO> selectList = baseMapper.getList(null);
         Map<String,Object> baMap = new HashMap<>();
         Map<String,Object> bbMap = new HashMap<>();
@@ -231,7 +242,7 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
         list.add(beMap);
         list.add(bfMap);
         list.add(bgMap);
-        list.add(bhMap);
+        list.add(bhMap);*/
         return list;
     }
 
@@ -267,6 +278,10 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
     public List<lyEmptyContainerVO> listPage(lyEmptyContainer params) {
         List<lyEmptyContainerVO> list = baseMapper.getList(params);
         return list;
+    }
+
+    public Map<String,Object> getListCount(lyEmptyContainer params){
+        return baseMapper.getListCount(params);
     }
 
 

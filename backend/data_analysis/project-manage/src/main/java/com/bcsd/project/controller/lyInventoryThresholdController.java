@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @ClassName InventoryThresholdController
+ * @ClassName 零件库存阈值 lyInventoryThresholdController
  * @Description: TODO
  * @Author Mingrui
  * @Date 2023/9/6

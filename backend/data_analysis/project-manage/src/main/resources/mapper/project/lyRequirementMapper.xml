@@ -116,7 +116,7 @@
         select b.*,
         a.matText as color,
         from ly_requirement b
-        left join ly_requirement a on b.code = a.matCode
+        left join ly_inventory a on b.code = a.matCode
         where 1 = 1
         <if test="code != null and code !=''" >
             and b.code = #{code,jdbcType=VARCHAR}
