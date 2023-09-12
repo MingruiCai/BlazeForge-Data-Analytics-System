@@ -30,6 +30,7 @@ public class lyRequirementImplService implements lyRequirementService {
 
     /**
      * 列表
+     *
      * @param requirement
      */
     @Override
@@ -41,24 +42,36 @@ public class lyRequirementImplService implements lyRequirementService {
 
     /**
      * 新增更新
+     *
      * @param requirement
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addOrUpdate(lyRequirement requirement) {
-        if (requirement.getId() != null) {
-            requirement.setUpdateBy(getUsername());
-            requirement.setUpdateTime(new Date());
-            requirementMapper.updateByPrimaryKeySelective(requirement);
-        } else {
-            requirement.setCreateBy(getUsername());
-            requirement.setCreateTime(new Date());
-            requirementMapper.insertSelective(requirement);
+        List<String> codeList = requirementMapper.getCodeList();
+        boolean codeExists = false;
+        for (String code : codeList) {
+            if (code.equals(requirement.getCode())) {
+                codeExists = true;
+                break;
+            }
+        }
+        if (codeExists) {
+            if (requirement.getId() != null) {
+                requirement.setUpdateBy(getUsername());
+                requirement.setUpdateTime(new Date());
+                requirementMapper.updateByPrimaryKeySelective(requirement);
+            } else {
+                requirement.setCreateBy(getUsername());
+                requirement.setCreateTime(new Date());
+                requirementMapper.insertSelective(requirement);
+            }
         }
     }
 
     /**
      * 删除
+     *
      * @param id
      */
     @Override
@@ -67,8 +80,10 @@ public class lyRequirementImplService implements lyRequirementService {
         requirementMapper.deleteByPrimaryKey(id);
         return AjaxResult.success();
     }
+
     /**
      * 根据ID查询
+     *
      * @param id
      * @return
      */

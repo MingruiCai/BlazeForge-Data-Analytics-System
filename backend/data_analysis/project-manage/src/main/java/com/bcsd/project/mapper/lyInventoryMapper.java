@@ -33,4 +33,7 @@ public interface lyInventoryMapper extends BaseMapper<lyInventory> {
 
     int updProcessingStatus(JSONObject params);
 
+    Map<String,Object> getFhjhljqkqkCount();
+
+    List<Map<String,Object>> getFhjhljqkqkList();
 }

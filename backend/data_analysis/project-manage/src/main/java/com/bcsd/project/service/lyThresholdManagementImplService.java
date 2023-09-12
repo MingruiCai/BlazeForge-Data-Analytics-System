@@ -30,31 +30,46 @@ public class lyThresholdManagementImplService implements lyThresholdManagementSe
 
     /**
      * 列表
+     *
      * @param thresholdManagement
      */
     @Override
     public List<lyThresholdManagement> list(lyThresholdManagement thresholdManagement) {
         return thresholdManagementMapper.selectThresholdManagementList(thresholdManagement);
     }
+
     /**
      * 新增更新
+     *
      * @param thresholdManagement
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addOrUpdate(lyThresholdManagement thresholdManagement) {
-        if (thresholdManagement.getId() != null) {
-            thresholdManagement.setUpdateBy(getUsername());
-            thresholdManagement.setUpdateTime(new Date());
-            thresholdManagementMapper.updateByPrimaryKeySelective(thresholdManagement);
-        } else {
-            thresholdManagement.setCreateBy(getUsername());
-            thresholdManagement.setCreateTime(new Date());
-            thresholdManagementMapper.insertSelective(thresholdManagement);
+        List<String> codeList = thresholdManagementMapper.getCodeList();
+        boolean codeExists = false;
+        for (String code : codeList) {
+            if (code.equals(thresholdManagement.getCode())) {
+                codeExists = true;
+                break;
+            }
+        }
+        if (codeExists) {
+            if (thresholdManagement.getId() != null) {
+                thresholdManagement.setUpdateBy(getUsername());
+                thresholdManagement.setUpdateTime(new Date());
+                thresholdManagementMapper.updateByPrimaryKeySelective(thresholdManagement);
+            } else {
+                thresholdManagement.setCreateBy(getUsername());
+                thresholdManagement.setCreateTime(new Date());
+                thresholdManagementMapper.insertSelective(thresholdManagement);
+            }
         }
     }
+
     /**
      * 删除
+     *
      * @param id
      */
     @Override
@@ -63,8 +78,10 @@ public class lyThresholdManagementImplService implements lyThresholdManagementSe
         thresholdManagementMapper.deleteByPrimaryKey(id);
         return AjaxResult.success();
     }
+
     /**
      * 根据ID查询
+     *
      * @param id
      * @return
      */

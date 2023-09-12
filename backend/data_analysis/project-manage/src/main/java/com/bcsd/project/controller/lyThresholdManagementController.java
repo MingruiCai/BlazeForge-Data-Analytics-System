@@ -36,7 +36,7 @@ public class lyThresholdManagementController extends BaseController{
      * @param thresholdManagement
      * @return
      */
-    @ApiOperation("查看需求分页")
+    @ApiOperation("查看阈值管理分页")
     @PostMapping("/list")
     public TableDataInfo list(@RequestBody lyThresholdManagement thresholdManagement) {
         startPage(thresholdManagement);
@@ -48,7 +48,7 @@ public class lyThresholdManagementController extends BaseController{
      * @param thresholdManagement
      * @return
      */
-    @ApiOperation("新增或修改需求计划")
+    @ApiOperation("新增或修改阈值管理")
     @PostMapping("/addOrUpdate")
     public AjaxResult addOrUpdate(@RequestBody lyThresholdManagement thresholdManagement) {
         thresholdManagementService.addOrUpdate(thresholdManagement);
@@ -59,7 +59,7 @@ public class lyThresholdManagementController extends BaseController{
      * @param jsonObject
      * @return
      */
-    @ApiOperation("删除需求计划")
+    @ApiOperation("删除阈值管理")
     @PostMapping({"/delete"})
     public AjaxResult delete(@RequestBody JSONObject jsonObject) {
         return thresholdManagementService.delete(jsonObject.getLong("id"));

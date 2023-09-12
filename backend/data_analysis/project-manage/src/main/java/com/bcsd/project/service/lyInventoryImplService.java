@@ -55,6 +55,9 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
     @Autowired
     private lyRequirementMapper requirementMapper;
 
+    @Autowired
+    private lyThresholdManagementMapper thresholdManagementMapper;
+
 
     /**
      * 新增库存基本信息
@@ -346,12 +349,24 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
         LambdaQueryWrapper<lyInventory> wrapper = new LambdaQueryWrapper<>();
         wrapper.isNotNull(lyInventory::getBatchAttr07);
         Integer selectCount = baseMapper.selectCount(wrapper);
-//        for (int i = 0; i < getBatchAttr07.size(); i++) {
-//            String format = String.format("%.2f", ((Double.valueOf(getBatchAttr07.get(i).toString()) / selectCount.doubleValue()) * 100));
-//
-//        }
+        List<lyThresholdManagement> listByType = thresholdManagementMapper.getListByType("零件状态");
+        Map<String,Object> jhMap = new HashMap<>();
+        for (lyThresholdManagement management : listByType) {
+            jhMap.put(management.getName(),management);
+        }
+        for (Map<String, Object> map : getBatchAttr07) {
+            map.put("colourType",0);
+            if(!jhMap.isEmpty() && jhMap != null){
+                lyThresholdManagement requirement = new ObjectMapper().convertValue(jhMap.get(map.get("batchAttr07")), lyThresholdManagement.class);
+                if(ObjectUtils.isNotEmpty(requirement)){
+                    Integer batchAttr07Count = Integer.valueOf(map.get("batchAttr07Count").toString());
+                    if(batchAttr07Count < requirement.getLowerLimit() || batchAttr07Count > requirement.getUpperLimit()){
+                        map.put("colourType",1);
+                    }
+                }
+            }
+        }
         res.put("batchAttr07",getBatchAttr07);
-//        res.put("percentage",format);
         res.put("allCount",selectCount);
         return AjaxResult.success(res);
     }
@@ -485,9 +500,22 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
     public AjaxResult updProcessingStatus(JSONObject jsonObject,String userName){
         jsonObject.put("updateBy",userName);
         jsonObject.put("updateTime",new Date());
-        //inventory.setUpdateBy(userName);
-        //inventory.setUpdateTime(new Date());
         baseMapper.updProcessingStatus(jsonObject);
         return AjaxResult.success();
     }
+
+    /**
+     *  零件计划缺口统计
+     */
+    public Map<String,Object> getFhjhljqkqkCount(){
+        return baseMapper.getFhjhljqkqkCount();
+    }
+
+    /**
+     *  零件计划缺口统计明细
+     */
+    public List<Map<String,Object>> getFhjhljqkqkList(){
+        return baseMapper.getFhjhljqkqkList();
+    }
+
 }

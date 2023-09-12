@@ -171,4 +171,24 @@ public class lyInventoryController extends BaseController {
         inventoryImplService.updProcessingStatus(params,getUsername());
     }
 
+
+    /**
+     * 中央大屏-零件计划缺口统计明细
+     * @param
+     * @return
+     */
+    @PostMapping("/getFhjhljqkqkList")
+    public AjaxResult getFhjhljqkqkList(){
+        return AjaxResult.success(inventoryImplService.getFhjhljqkqkList());
+    }
+
+    /**
+     * 中央大屏-零件计划缺口统计
+     * @param
+     * @return
+     */
+    @PostMapping("/getFhjhljqkqkCount")
+    public AjaxResult getFhjhljqkqkCount(){
+        return AjaxResult.success(inventoryImplService.getFhjhljqkqkCount());
+    }
 }

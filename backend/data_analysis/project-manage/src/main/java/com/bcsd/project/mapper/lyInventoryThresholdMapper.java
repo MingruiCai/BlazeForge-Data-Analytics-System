@@ -8,11 +8,17 @@ import java.util.List;
 public interface lyInventoryThresholdMapper {
 
     List<lyInventoryThreshold> selectInventoryThresholdList(lyInventoryThreshold inventoryThreshold);
+
     int insertSelective(lyInventoryThreshold record);
+
     int updateByPrimaryKeySelective(lyInventoryThreshold record);
+
     int deleteByPrimaryKey(Long id);
 
     lyInventoryThreshold selectByPrimaryKey(Long id);
+
+    @Select("select code from ly_inventory_threshold")
+    List<String> getCodeList();
 
     @Select("select * from ly_inventory_threshold")
     List<lyInventoryThreshold> getList();

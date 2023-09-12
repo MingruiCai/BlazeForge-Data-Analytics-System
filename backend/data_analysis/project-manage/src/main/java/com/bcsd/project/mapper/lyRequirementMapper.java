@@ -9,12 +9,17 @@ import java.util.List;
 public interface lyRequirementMapper {
 
     List<lyRequirement> selectRequirementList(lyRequirement requirement);
+
     int insertSelective(lyRequirement record);
+
     int updateByPrimaryKeySelective(lyRequirement record);
+
     int deleteByPrimaryKey(Long id);
 
     lyRequirement selectByPrimaryKey(Long id);
 
+    @Select("select code from ly_requirement")
+    List<String> getCodeList();
 
     @Select("select * from ly_requirement where date = #{dayDate}")
     List<lyRequirement> getRequirementList(String dayDate);

@@ -12,11 +12,15 @@ import com.bcsd.common.utils.poi.ExcelUtil;
 import com.bcsd.project.constants.Constants;
 import com.bcsd.project.domain.lyEmptyContainer;
 import com.bcsd.project.domain.lyInventory;
+import com.bcsd.project.domain.lyThresholdManagement;
 import com.bcsd.project.domain.vo.lyEmptyContainerVO;
 import com.bcsd.project.mapper.lyEmptyContainerMapper;
 import com.bcsd.project.mapper.lyInventoryMapper;
+import com.bcsd.project.mapper.lyThresholdManagementMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +37,8 @@ import java.util.*;
 @Slf4j
 @Service
 public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMapper, lyEmptyContainer> implements IService<lyEmptyContainer> {
-
+    @Autowired
+    private lyThresholdManagementMapper thresholdManagementMapper;
 
     /**
      * 新增空容器基本信息
@@ -160,8 +165,23 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
      */
     public List<Map<String, Object>> getContainerCount(){
         List<Map<String, Object>> list = baseMapper.getContainerCount();
+        List<lyThresholdManagement> listByType = thresholdManagementMapper.getListByType("空容器");
+        Map<String,Object> jhMap = new HashMap<>();
+        for (lyThresholdManagement management : listByType) {
+            jhMap.put(management.getName(),management);
+        }
         //List<Map<String, Object>> list = new ArrayList();
         for (Map<String, Object> objectMap : list) {
+            objectMap.put("colourType",0);
+            if(!jhMap.isEmpty() && jhMap != null){
+                lyThresholdManagement requirement = new ObjectMapper().convertValue(jhMap.get(objectMap.get("podTypText")), lyThresholdManagement.class);
+                if(ObjectUtils.isNotEmpty(requirement)){
+                    Integer podTypeCount = Integer.valueOf(objectMap.get("podTypeCount").toString());
+                    if(podTypeCount < requirement.getLowerLimit()){
+                        objectMap.put("colourType",1);
+                    }
+                }
+            }
             objectMap.put("percentage",String.format("%.2f", ((Double.valueOf(objectMap.get("podTypeCount").toString()) / Double.valueOf(objectMap.get("totalCount").toString())) * 100)));
         }
         /*

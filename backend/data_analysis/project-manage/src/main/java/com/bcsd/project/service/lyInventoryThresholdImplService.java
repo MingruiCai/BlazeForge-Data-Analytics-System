@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.bcsd.common.utils.SecurityUtils.*;
 
@@ -33,6 +35,7 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
 
     /**
      * 列表
+     *
      * @param inventoryThreshold
      */
     @Override
@@ -44,24 +47,37 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
 
     /**
      * 新增更新
+     *
      * @param inventoryThreshold
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addOrUpdate(lyInventoryThreshold inventoryThreshold) {
-        if (inventoryThreshold.getId() != null) {
-            inventoryThreshold.setUpdateBy(getUsername());
-            inventoryThreshold.setUpdateTime(new Date());
-            inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
-        } else {
-            inventoryThreshold.setCreateBy(getUsername());
-            inventoryThreshold.setCreateTime(new Date());
-            inventoryThresholdMapper.insertSelective(inventoryThreshold);
+        List<String> codeList = inventoryThresholdMapper.getCodeList();
+        boolean codeExists = false;
+        for (String code : codeList) {
+            if (code.equals(inventoryThreshold.getCode())) {
+                codeExists = true;
+                break;
+            }
         }
+        if (codeExists) {
+            if (inventoryThreshold.getId() != null) {
+                inventoryThreshold.setUpdateBy(getUsername());
+                inventoryThreshold.setUpdateTime(new Date());
+                inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
+            } else {
+                inventoryThreshold.setCreateBy(getUsername());
+                inventoryThreshold.setCreateTime(new Date());
+                inventoryThresholdMapper.insertSelective(inventoryThreshold);
+            }
+        }
+
     }
 
     /**
      * 删除
+     *
      * @param id
      */
     @Override
@@ -73,6 +89,7 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
 
     /**
      * 根据ID查询
+     *
      * @param id
      * @return inventoryThreshold
      */
