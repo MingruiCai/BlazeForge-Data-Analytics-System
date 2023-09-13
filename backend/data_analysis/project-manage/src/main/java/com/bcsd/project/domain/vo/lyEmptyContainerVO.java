@@ -27,5 +27,7 @@ public class lyEmptyContainerVO {
 
     private String binUtilization;
 
+    private String hotIndex;
+
 
 }

@@ -48,32 +48,10 @@ public class lyThresholdManagementController extends BaseController{
      * @param thresholdManagement
      * @return
      */
-    @ApiOperation("新增或修改阈值管理")
-    @PostMapping("/addOrUpdate")
-    public AjaxResult addOrUpdate(@RequestBody lyThresholdManagement thresholdManagement) {
-        thresholdManagementService.addOrUpdate(thresholdManagement);
+    @ApiOperation("修改阈值管理上下限值")
+    @PostMapping("/update")
+    public AjaxResult update(@RequestBody lyThresholdManagement thresholdManagement) {
+        thresholdManagementService.update(thresholdManagement);
         return AjaxResult.success();
     }
-    /**
-     * 删除
-     * @param jsonObject
-     * @return
-     */
-    @ApiOperation("删除阈值管理")
-    @PostMapping({"/delete"})
-    public AjaxResult delete(@RequestBody JSONObject jsonObject) {
-        return thresholdManagementService.delete(jsonObject.getLong("id"));
-    }
-    /**
-     * 根据id查询
-     * @param jsonObject
-     * @return
-     */
-    @ApiOperation("根据id查询")
-    @PostMapping({"/getById"})
-    public AjaxResult getById(@RequestBody JSONObject jsonObject) {
-        lyThresholdManagement thresholdManagement=thresholdManagementService.selectByPrimaryKey(jsonObject.getLong("id"));
-        return AjaxResult.success(thresholdManagement);
-    }
-
 }

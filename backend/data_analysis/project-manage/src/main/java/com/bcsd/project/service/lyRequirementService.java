@@ -8,7 +8,7 @@ import java.util.List;
 public interface lyRequirementService {
     List<lyRequirement> list(lyRequirement requirement);
 
-    void addOrUpdate(lyRequirement requirement);
+    AjaxResult addOrUpdate(lyRequirement requirement);
 
     AjaxResult delete(Long id);
 

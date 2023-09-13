@@ -42,6 +42,18 @@ public class lyInventoryThresholdController extends BaseController{
         return getDataTable(list);
     }
     /**
+     * 零件号分页
+     * @param inventoryThreshold
+     * @return
+     */
+    @ApiOperation("查看零件号分页")
+    @PostMapping("/codeList")
+    public TableDataInfo codeList(@RequestBody lyInventoryThreshold inventoryThreshold) {
+        startPage(inventoryThreshold);
+        List<lyInventoryThreshold> list= inventoryThresholdService.codeList(inventoryThreshold);
+        return getDataTable(list);
+    }
+    /**
      * 新增修改
      * @param inventoryThreshold
      * @return
@@ -49,8 +61,7 @@ public class lyInventoryThresholdController extends BaseController{
     @ApiOperation("新增或修改零件库存阈值")
     @PostMapping("/addOrUpdate")
     public AjaxResult addOrUpdate(@RequestBody lyInventoryThreshold inventoryThreshold) {
-        inventoryThresholdService.addOrUpdate(inventoryThreshold);
-        return AjaxResult.success();
+        return inventoryThresholdService.addOrUpdate(inventoryThreshold);
     }
     /**
      * 删除

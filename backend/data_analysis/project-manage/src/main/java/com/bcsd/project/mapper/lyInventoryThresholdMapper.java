@@ -17,8 +17,8 @@ public interface lyInventoryThresholdMapper {
 
     lyInventoryThreshold selectByPrimaryKey(Long id);
 
-    @Select("select code from ly_inventory_threshold")
-    List<String> getCodeList();
+    List<lyInventoryThreshold> selectCodeList(lyInventoryThreshold inventoryThreshold);
+    List<lyInventoryThreshold> checkCodeExists(String code);
 
     @Select("select * from ly_inventory_threshold")
     List<lyInventoryThreshold> getList();

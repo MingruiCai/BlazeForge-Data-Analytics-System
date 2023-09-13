@@ -4,6 +4,7 @@
     <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyRequirement" >
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="color" property="color" jdbcType="VARCHAR"/>
         <result column="date" property="date" jdbcType="TIMESTAMP"/>
         <result column="quantity" property="quantity" jdbcType="INTEGER"/>
         <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
@@ -13,14 +14,12 @@
     </resultMap>
     <sql id="Base_Column_List">
         id
-        , code, date, quantity, create_by, create_time, update_by, update_time
+        , code, color, date, quantity, create_by, create_time, update_by, update_time
     </sql>
     <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold" parameterType="java.lang.Long">
-        select b.*,
-               a.matText as color,
-        from ly_requirement b
-                 left join ly_inventory a on b.code = a.matCode
-        where b.id = #{id,jdbcType=BIGINT}
+        select *
+        from ly_requirement
+        where id = #{id,jdbcType=BIGINT}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -36,6 +35,9 @@
             </if>
             <if test="code != null">
                 code,
+            </if>
+            <if test="code != null">
+                color,
             </if>
             <if test="date != null">
                 date,
@@ -62,6 +64,9 @@
             </if>
             <if test="code != null">
                 #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="color != null">
+                #{color,jdbcType=VARCHAR},
             </if>
             <if test="date != null">
                 #{date,jdbcType=TIMESTAMP},
@@ -90,6 +95,9 @@
             <if test="code != null">
                 code = #{code,jdbcType=VARCHAR},
             </if>
+            <if test="color != null">
+                color = #{color,jdbcType=VARCHAR},
+            </if>
             <if test="date != null">
                 date = #{date,jdbcType=TIMESTAMP},
             </if>
@@ -113,17 +121,21 @@
     </update>
 
     <select id="selectRequirementList" parameterType="com.bcsd.project.domain.lyRequirement" resultType="com.bcsd.project.domain.lyRequirement">
-        select b.*,
-        a.matText as color,
-        from ly_requirement b
-        left join ly_inventory a on b.code = a.matCode
+        select *
+        from ly_requirement
         where 1 = 1
         <if test="code != null and code !=''" >
-            and b.code = #{code,jdbcType=VARCHAR}
+            and code like concat('%', #{code}, '%')
         </if>
         <if test="date != null and color !=''" >
-            and b.date = #{date,jdbcType=TIMESTAMP}
+            and date = #{date,jdbcType=TIMESTAMP}
         </if>
-        ORDER BY b.date
+        ORDER BY date
+    </select>
+
+    <select id="checkCodeExists" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
+        SELECT *
+        FROM ly_requirement
+        WHERE date = #{date,jdbcType=TIMESTAMP} and code = #{code,jdbcType=VARCHAR}
     </select>
 </mapper>

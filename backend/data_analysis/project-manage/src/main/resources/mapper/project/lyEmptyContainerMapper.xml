@@ -70,7 +70,7 @@
   </select>
 
   <select id="getList" resultType="com.bcsd.project.domain.vo.lyEmptyContainerVO" parameterType="com.bcsd.project.domain.lyEmptyContainer">
-    select podTypText,podCode,initStatusText,berthCode,binUtilization from ly_empty_container where 1=1
+    select podTypText,podCode,initStatusText,berthCode,binUtilization,hotIndex from ly_empty_container where 1=1
     <if test="podTypTexts != null and podTypTexts.size > 0">
       and podTypText in
       <foreach collection="podTypTexts" item="podTypText" open="(" separator="," close=")">
@@ -79,6 +79,9 @@
     </if>
     <if test="podTypeCount != null">
       and podTypeCount = #{podTypeCount}
+    </if>
+    <if test="type != null and type != ''">
+      and podTypeCount != 0
     </if>
   </select>
 

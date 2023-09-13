@@ -17,10 +17,8 @@ public interface lyThresholdManagementMapper {
     int deleteByPrimaryKey(Long id);
 
     lyThresholdManagement selectByPrimaryKey(Long id);
-
-    @Select("select code from ly_threshold_management")
-    List<String> getCodeList();
-
+    @Select("select code, COUNT(*) as count from ly_threshold_management group by code having COUNT(*) > 1 ")
+    String checkCodeDuplicate(String code);
     @Select("select * from ly_threshold_management where type = #{type} AND status = '1'")
     List<lyThresholdManagement> getListByType(String type);
 }

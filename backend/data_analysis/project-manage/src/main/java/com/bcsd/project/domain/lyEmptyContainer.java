@@ -192,4 +192,7 @@ public class lyEmptyContainer extends BaseInfo {
 
     @TableField(exist = false)
     private List<String> podTypTexts;
+
+    @TableField(exist = false)
+    private String type;
 }

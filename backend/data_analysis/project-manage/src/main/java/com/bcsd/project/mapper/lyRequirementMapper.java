@@ -18,9 +18,9 @@ public interface lyRequirementMapper {
 
     lyRequirement selectByPrimaryKey(Long id);
 
-    @Select("select code from ly_requirement")
-    List<String> getCodeList();
-
+    List<lyInventoryThreshold> checkCodeExists(String code);
     @Select("select * from ly_requirement where date = #{dayDate}")
     List<lyRequirement> getRequirementList(String dayDate);
+
+
 }

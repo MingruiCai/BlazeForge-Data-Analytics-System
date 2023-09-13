@@ -36,4 +36,11 @@ public interface lyInventoryMapper extends BaseMapper<lyInventory> {
     Map<String,Object> getFhjhljqkqkCount();
 
     List<Map<String,Object>> getFhjhljqkqkList();
+
+    Map<String,Object> getKcyjCount();
+
+    List<Map<String,Object>> getKcyjList();
+
+    List<lyInventory> getByMatCode(String matCode);
+
 }

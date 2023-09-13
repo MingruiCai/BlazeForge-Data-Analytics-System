@@ -61,11 +61,12 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
 
     /**
      * 新增库存基本信息
+     *
      * @param
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public void add(){
+    public void add() {
         /*JSONObject jsonObject = new JSONObject();
         jsonObject.put("pageNum",1);
         jsonObject.put("pageSize",10000);
@@ -170,51 +171,51 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
                 "}");
         String res = sb.toString();
         JSONObject jsonObject2 = JSONObject.parseObject(res);
-        if(!jsonObject2.getString("code").equals("0")){
-            log.error("获取数据失败"+jsonObject2.getString("message"));
+        if (!jsonObject2.getString("code").equals("0")) {
+            log.error("获取数据失败" + jsonObject2.getString("message"));
             return;
         }
         String data = jsonObject2.getString("data");
-        List <lyInventory> entityList = JSON.parseArray(data,lyInventory.class);
+        List<lyInventory> entityList = JSON.parseArray(data, lyInventory.class);
         //获取需求计划设置
         List<lyRequirement> requirementList = requirementMapper.getRequirementList(DateUtils.getDate());
-        Map<String,Object> xqjhMap = new HashMap<>();
+        Map<String, Object> xqjhMap = new HashMap<>();
         for (lyRequirement requirement : requirementList) {
-            xqjhMap.put(requirement.getCode(),requirement);
+            xqjhMap.put(requirement.getCode(), requirement);
         }
         //获取零件库存阈值
         List<lyInventoryThreshold> list = inventoryThresholdMapper.getList();
-        Map<String,Object> objectMap = new HashMap<>();
+        Map<String, Object> objectMap = new HashMap<>();
         for (lyInventoryThreshold threshold : list) {
-            objectMap.put(threshold.getCode(),threshold);
+            objectMap.put(threshold.getCode(), threshold);
         }
 
         for (lyInventory inventory : entityList) {
-            if(!objectMap.isEmpty() && objectMap != null){
+            if (!objectMap.isEmpty() && objectMap != null) {
                 lyInventoryThreshold threshold = new ObjectMapper().convertValue(objectMap.get(inventory.getMatCode()), lyInventoryThreshold.class);
-                if(ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() < threshold.getLowerLimit()){
+                if (ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() < threshold.getLowerLimit()) {
                     inventory.setInventoryStatus(1);
-                }else if(ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() > threshold.getUpperLimit()){
+                } else if (ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() > threshold.getUpperLimit()) {
                     inventory.setInventoryStatus(2);
-                }else if(ObjectUtils.isNotEmpty(threshold)){
+                } else if (ObjectUtils.isNotEmpty(threshold)) {
                     inventory.setInventoryStatus(0);
                 }
             }
 
-            if(!xqjhMap.isEmpty() && xqjhMap != null){
+            if (!xqjhMap.isEmpty() && xqjhMap != null) {
                 lyRequirement requirement = new ObjectMapper().convertValue(xqjhMap.get(inventory.getMatCode()), lyRequirement.class);
-                if(ObjectUtils.isNotEmpty(requirement)){
+                if (ObjectUtils.isNotEmpty(requirement)) {
                     Double qty = Double.valueOf(requirement.getQuantity()) - inventory.getTotalQty();
-                    if(qty > 0){
+                    if (qty > 0) {
                         inventory.setProcessingStatus(1);  //未处理
-                    }else {
+                    } else {
                         inventory.setProcessingStatus(0);  //无需处理
                     }
                 }
             }
             lyInventory lyInventory = baseMapper.selectByStkCode(inventory);
-            if(ObjectUtils.isNotEmpty(lyInventory)){
-                BeanUtils.copyProperties(lyInventory,inventory);
+            if (ObjectUtils.isNotEmpty(lyInventory)) {
+                BeanUtils.copyProperties(lyInventory, inventory);
                 baseMapper.updateById(lyInventory);
                 break;
             }
@@ -224,50 +225,93 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
     }
 
     /**
+     * 需求计划新增修改 同步修改零件库存 缺口处理状态
+     *
+     * @param requirement
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updinventoryStatus(lyRequirement requirement) {
+        List<lyInventory> byMatCodeList = baseMapper.getByMatCode(requirement.getCode());
+        for (lyInventory inventory : byMatCodeList) {
+            Double qty = Double.valueOf(requirement.getQuantity()) - inventory.getTotalQty();
+            if (qty > 0) {
+                inventory.setProcessingStatus(1);  //未处理
+            } else {
+                inventory.setProcessingStatus(0);  //无需处理
+            }
+        }
+        saveOrUpdateBatch(byMatCodeList);
+    }
+
+    /**
+     * 需求计划新增修改 同步修改零件库存 告警状态
+     *
+     * @param threshold
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updProcessingStatus(lyInventoryThreshold threshold) {
+        List<lyInventory> byMatCodeList = baseMapper.getByMatCode(threshold.getCode());
+        for (lyInventory inventory : byMatCodeList) {
+            if (inventory.getTotalQty() < threshold.getLowerLimit()) {
+                inventory.setInventoryStatus(1);
+            } else if (inventory.getTotalQty() > threshold.getUpperLimit()) {
+                inventory.setInventoryStatus(2);
+            } else {
+                inventory.setInventoryStatus(0);
+            }
+        }
+        saveOrUpdateBatch(byMatCodeList);
+    }
+
+    /**
      * 已装配零件统计
+     *
      * @return
      */
-    public AjaxResult getAssembled(){
-        Map<String,Object> res = new HashMap<>();
+    public AjaxResult getAssembled() {
+        Map<String, Object> res = new HashMap<>();
         Integer assembledCount = baseMapper.getAssembledCount();
         LambdaQueryWrapper<lyInventory> wrapper = new LambdaQueryWrapper<>();
         wrapper.isNotNull(lyInventory::getBatchAttr07);
         Integer selectCount = baseMapper.selectCount(wrapper);
         //String format = String.format("%.2f", ((assembledCount.doubleValue() / selectCount.doubleValue()) * 100));
-        List<Map<String,Object>> getMapNameCount = baseMapper.getMapNameCount();
-        res.put("assembledCount",assembledCount);
+        List<Map<String, Object>> getMapNameCount = baseMapper.getMapNameCount();
+        res.put("assembledCount", assembledCount);
         //res.put("percentage",format);
-        res.put("allCount",selectCount);
-        res.put("MapNameCount",getMapNameCount);
+        res.put("allCount", selectCount);
+        res.put("MapNameCount", getMapNameCount);
         return AjaxResult.success(res);
     }
 
 
     /**
      * 已装配零件列表
+     *
      * @param params
      * @return
      */
-    public List<Map<String,Object>> listPage(lyInventory params) {
+    public List<Map<String, Object>> listPage(lyInventory params) {
         return baseMapper.getAssembledList(params);
     }
+
     /**
      * 已装配零件列表统计
+     *
      * @param params
      * @return
      */
-    public Map<String,Object> getAllCount(lyInventory params){
+    public Map<String, Object> getAllCount(lyInventory params) {
         return baseMapper.getCount(params);
     }
 
 
-
     /**
      * 已装配零件导出
+     *
      * @param response
      * @param request
      */
-    public void excelDownload(HttpServletResponse response, HttpServletRequest request,lyInventory params) {
+    public void excelDownload(HttpServletResponse response, HttpServletRequest request, lyInventory params) {
         List<Map<String, Object>> assembledList = baseMapper.getAssembledList(params);
         List<List<String>> dataList = new ArrayList<>();
         for (Map<String, Object> map : assembledList) {
@@ -283,54 +327,55 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
         headList.add("零件颜色");
         headList.add("已装配数（按总计数量）");
         headList.add("已装配数（按可用库存）");
-        ExcelUtil.uploadExcelAboutUser(request,response,"已装配零件",headList,dataList);
+        ExcelUtil.uploadExcelAboutUser(request, response, "已装配零件", headList, dataList);
     }
 
     /**
      * 导入数据
+     *
      * @param data
      * @param userName
      * @return
      */
-    public AjaxResult importData(List<lyInventory> data,String userName){
+    public AjaxResult importData(List<lyInventory> data, String userName) {
         //获取需求计划设置
         List<lyRequirement> requirementList = requirementMapper.getRequirementList(DateUtils.getDate());
-        Map<String,Object> xqjhMap = new HashMap<>();
+        Map<String, Object> xqjhMap = new HashMap<>();
         for (lyRequirement requirement : requirementList) {
-            xqjhMap.put(requirement.getCode(),requirement);
+            xqjhMap.put(requirement.getCode(), requirement);
         }
         //获取零件库存阈值
         List<lyInventoryThreshold> list = inventoryThresholdMapper.getList();
-        Map<String,Object> objectMap = new HashMap<>();
+        Map<String, Object> objectMap = new HashMap<>();
         for (lyInventoryThreshold threshold : list) {
-            objectMap.put(threshold.getCode(),threshold);
+            objectMap.put(threshold.getCode(), threshold);
         }
         for (lyInventory inventory : data) {
-            if(!objectMap.isEmpty() && objectMap != null){
+            if (!objectMap.isEmpty() && objectMap != null) {
                 lyInventoryThreshold threshold = new ObjectMapper().convertValue(objectMap.get(inventory.getMatCode()), lyInventoryThreshold.class);
-                if(ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() < threshold.getLowerLimit()){
+                if (ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() < threshold.getLowerLimit()) {
                     inventory.setInventoryStatus(1);
-                }else if(ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() > threshold.getUpperLimit()){
+                } else if (ObjectUtils.isNotEmpty(threshold) && inventory.getTotalQty() > threshold.getUpperLimit()) {
                     inventory.setInventoryStatus(2);
-                }else if(ObjectUtils.isNotEmpty(threshold)){
+                } else if (ObjectUtils.isNotEmpty(threshold)) {
                     inventory.setInventoryStatus(0);
                 }
             }
 
-            if(!xqjhMap.isEmpty() && xqjhMap != null){
+            if (!xqjhMap.isEmpty() && xqjhMap != null) {
                 lyRequirement requirement = new ObjectMapper().convertValue(xqjhMap.get(inventory.getMatCode()), lyRequirement.class);
-                if(ObjectUtils.isNotEmpty(requirement)){
+                if (ObjectUtils.isNotEmpty(requirement)) {
                     Double qty = Double.valueOf(requirement.getQuantity()) - inventory.getTotalQty();
-                    if(qty > 0){
+                    if (qty > 0) {
                         inventory.setProcessingStatus(1);  //未处理
-                    }else {
+                    } else {
                         inventory.setProcessingStatus(0);  //无需处理
                     }
                 }
             }
             inventory.setCreateTime(DateUtils.getNowDate());
             inventory.setCreateBy(userName);
-            log.error(""+inventory.getStkCode());
+            log.error("" + inventory.getStkCode());
         }
         //保存数据
         saveBatch(data);
@@ -338,46 +383,51 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
     }
 
 
-
     /**
      * 零件状态统计
+     *
      * @return
      */
-    public AjaxResult getBatchAttr07(){
-        Map<String,Object> res = new HashMap<>();
-        List<Map<String,Object>> getBatchAttr07 = baseMapper.getBatchAttr07();
+    public AjaxResult getBatchAttr07() {
+        Map<String, Object> res = new HashMap<>();
+        List<Map<String, Object>> getBatchAttr07 = baseMapper.getBatchAttr07();
         LambdaQueryWrapper<lyInventory> wrapper = new LambdaQueryWrapper<>();
         wrapper.isNotNull(lyInventory::getBatchAttr07);
         Integer selectCount = baseMapper.selectCount(wrapper);
         List<lyThresholdManagement> listByType = thresholdManagementMapper.getListByType("零件状态");
-        Map<String,Object> jhMap = new HashMap<>();
+        Map<String, Object> jhMap = new HashMap<>();
         for (lyThresholdManagement management : listByType) {
-            jhMap.put(management.getName(),management);
+            jhMap.put(management.getName(), management);
         }
         for (Map<String, Object> map : getBatchAttr07) {
-            map.put("colourType",0);
-            if(!jhMap.isEmpty() && jhMap != null){
+            map.put("colourType", 0);
+            map.put("lowerLimit", 0);
+            map.put("upperLimit", 0);
+            if (!jhMap.isEmpty() && jhMap != null) {
                 lyThresholdManagement requirement = new ObjectMapper().convertValue(jhMap.get(map.get("batchAttr07")), lyThresholdManagement.class);
-                if(ObjectUtils.isNotEmpty(requirement)){
+                if (ObjectUtils.isNotEmpty(requirement)) {
+                    map.put("lowerLimit", requirement.getLowerLimit());
+                    map.put("upperLimit", requirement.getUpperLimit());
                     Integer batchAttr07Count = Integer.valueOf(map.get("batchAttr07Count").toString());
-                    if(batchAttr07Count < requirement.getLowerLimit() || batchAttr07Count > requirement.getUpperLimit()){
-                        map.put("colourType",1);
+                    if (batchAttr07Count < requirement.getLowerLimit() || batchAttr07Count > requirement.getUpperLimit()) {
+                        map.put("colourType", 1);
                     }
                 }
             }
         }
-        res.put("batchAttr07",getBatchAttr07);
-        res.put("allCount",selectCount);
+        res.put("batchAttr07", getBatchAttr07);
+        res.put("allCount", selectCount);
         return AjaxResult.success(res);
     }
 
 
     /**
      * 零件状态导出
+     *
      * @param response
      * @param request
      */
-    public void excelDownload2(HttpServletResponse response, HttpServletRequest request,lyInventory params) {
+    public void excelDownload2(HttpServletResponse response, HttpServletRequest request, lyInventory params) {
         PageHelper.clearPage();
         List<Map<String, Object>> assembledList = baseMapper.getAssembledList(params);
         List<List<String>> dataList = new ArrayList<>();
@@ -396,22 +446,23 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
         headList.add("零件状态");
         headList.add("已装配数（按总计数量）");
         headList.add("已装配数（按可用库存）");
-        ExcelUtil.uploadExcelAboutUser(request,response,"零件状态",headList,dataList);
+        ExcelUtil.uploadExcelAboutUser(request, response, "零件状态", headList, dataList);
     }
 
     /**
-     *  零件库存告警统计
+     * 零件库存告警统计
      */
-    public List<Map<String, Object>> inventoryAlarmCount(lyInventory params){
+    public List<Map<String, Object>> inventoryAlarmCount(lyInventory params) {
         return baseMapper.inventoryAlarmCount(params);
     }
 
     /**
      * 零件库存告警统计导出
+     *
      * @param response
      * @param request
      */
-    public void excelDownload3(HttpServletResponse response, HttpServletRequest request,lyInventory params) {
+    public void excelDownload3(HttpServletResponse response, HttpServletRequest request, lyInventory params) {
         List<Map<String, Object>> assembledList = baseMapper.inventoryAlarmCount(params);
         List<List<String>> dataList = new ArrayList<>();
         for (Map<String, Object> map : assembledList) {
@@ -422,14 +473,14 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
             list.add(CommonUtils.nullToEmpty(map.get("lowerLimit")));
             list.add(CommonUtils.nullToEmpty(map.get("totalQty")));
             String inventoryStatus = CommonUtils.nullToEmpty(map.get("inventoryStatus"));
-            if(StringUtils.isEmpty(inventoryStatus)){
+            if (StringUtils.isEmpty(inventoryStatus)) {
                 list.add(inventoryStatus);
-            }else {
-                if("0".equals(inventoryStatus)){
+            } else {
+                if ("0".equals(inventoryStatus)) {
                     list.add("正常");
-                }else if("1".equals(inventoryStatus)){
+                } else if ("1".equals(inventoryStatus)) {
                     list.add("低下限告警");
-                }else {
+                } else {
                     list.add("超上限告警");
                 }
             }
@@ -442,20 +493,20 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
         headList.add("库存下限数量");
         headList.add("当前库存总数");
         headList.add("库存状态");
-        ExcelUtil.uploadExcelAboutUser(request,response,"零件库存告警统计",headList,dataList);
+        ExcelUtil.uploadExcelAboutUser(request, response, "零件库存告警统计", headList, dataList);
     }
 
     /**
-     *  零件计划缺口统计
+     * 零件计划缺口统计
      */
-    public List<InventoryGapsNumberVO> getGapsNumber(lyInventory params){
+    public List<InventoryGapsNumberVO> getGapsNumber(lyInventory params) {
         return baseMapper.getGapsNumber(params);
     }
 
     /**
-     *  零件计划缺口统计导出
+     * 零件计划缺口统计导出
      */
-    public void excelDownload4(HttpServletResponse response, HttpServletRequest request,lyInventory params) {
+    public void excelDownload4(HttpServletResponse response, HttpServletRequest request, lyInventory params) {
         List<InventoryGapsNumberVO> assembledList = baseMapper.getGapsNumber(params);
         List<List<String>> dataList = new ArrayList<>();
         for (InventoryGapsNumberVO map : assembledList) {
@@ -467,14 +518,14 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
             list.add(CommonUtils.nullToEmpty(map.getTotalQty()));
             list.add(CommonUtils.nullToEmpty(map.getGapNumber()));
             String processingStatus = CommonUtils.nullToEmpty(map.getProcessingStatus());
-            if(StringUtils.isEmpty(processingStatus)){
+            if (StringUtils.isEmpty(processingStatus)) {
                 list.add(processingStatus);
-            }else {
-                if("0".equals(processingStatus)){
+            } else {
+                if ("0".equals(processingStatus)) {
                     list.add("无需处理");
-                }else if("1".equals(processingStatus)){
+                } else if ("1".equals(processingStatus)) {
                     list.add("未处理");
-                }else {
+                } else {
                     list.add("已处理");
                 }
             }
@@ -488,34 +539,61 @@ public class lyInventoryImplService extends ServiceImpl<lyInventoryMapper, lyInv
         headList.add("当前库存总数");
         headList.add("缺口数量");
         headList.add("处理状态");
-        ExcelUtil.uploadExcelAboutUser(request,response,"零件计划缺口",headList,dataList);
+        ExcelUtil.uploadExcelAboutUser(request, response, "零件计划缺口", headList, dataList);
     }
 
     /**
      * 零件计划缺口统计修改状态
+     *
      * @param jsonObject
      * @param userName
      * @return
      */
-    public AjaxResult updProcessingStatus(JSONObject jsonObject,String userName){
-        jsonObject.put("updateBy",userName);
-        jsonObject.put("updateTime",new Date());
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResult updProcessingStatus(JSONObject jsonObject, String userName) {
+        jsonObject.put("updateBy", userName);
+        jsonObject.put("updateTime", new Date());
         baseMapper.updProcessingStatus(jsonObject);
         return AjaxResult.success();
     }
 
     /**
-     *  零件计划缺口统计
+     * 大屏-零件计划缺口统计
      */
-    public Map<String,Object> getFhjhljqkqkCount(){
+    public Map<String, Object> getFhjhljqkqkCount() {
         return baseMapper.getFhjhljqkqkCount();
     }
 
     /**
-     *  零件计划缺口统计明细
+     * 大屏-零件计划缺口统计明细
      */
-    public List<Map<String,Object>> getFhjhljqkqkList(){
+    public List<Map<String, Object>> getFhjhljqkqkList() {
         return baseMapper.getFhjhljqkqkList();
+    }
+
+
+    /**
+     * 零大屏-零件库存预警情况统计
+     */
+    public Map<String, Object> getKcyjCount() {
+        return baseMapper.getKcyjCount();
+    }
+
+    /**
+     * 大屏-零件库存预警情况明细
+     */
+    public List<Map<String, Object>> getKcyjList() {
+        List<Map<String, Object>> kcyjList = baseMapper.getKcyjList();
+        for (Map<String, Object> objectMap : kcyjList) {
+            Double difference;
+            if (objectMap.get("inventoryStatus").toString().equals("1")) {
+                difference = Double.valueOf(objectMap.get("lowerLimit").toString()) - Double.valueOf(objectMap.get("totalQty").toString());
+            } else {
+                difference = Double.valueOf(objectMap.get("totalQty").toString()) - Double.valueOf(objectMap.get("upperLimit").toString());
+            }
+            objectMap.put("difference", difference);
+        }
+        return kcyjList;
     }
 
 }

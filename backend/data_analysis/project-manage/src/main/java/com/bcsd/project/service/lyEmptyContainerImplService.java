@@ -173,9 +173,11 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
         //List<Map<String, Object>> list = new ArrayList();
         for (Map<String, Object> objectMap : list) {
             objectMap.put("colourType",0);
+            objectMap.put("lowerLimit",0);
             if(!jhMap.isEmpty() && jhMap != null){
                 lyThresholdManagement requirement = new ObjectMapper().convertValue(jhMap.get(objectMap.get("podTypText")), lyThresholdManagement.class);
                 if(ObjectUtils.isNotEmpty(requirement)){
+                    objectMap.put("lowerLimit",requirement.getLowerLimit());
                     Integer podTypeCount = Integer.valueOf(objectMap.get("podTypeCount").toString());
                     if(podTypeCount < requirement.getLowerLimit()){
                         objectMap.put("colourType",1);

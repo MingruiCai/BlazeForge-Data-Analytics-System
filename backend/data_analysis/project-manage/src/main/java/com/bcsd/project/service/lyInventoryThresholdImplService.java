@@ -40,9 +40,17 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
      */
     @Override
     public List<lyInventoryThreshold> list(lyInventoryThreshold inventoryThreshold) {
-
         return inventoryThresholdMapper.selectInventoryThresholdList(inventoryThreshold);
+    }
 
+    /**
+     * 零件号列表
+     *
+     * @param inventoryThreshold
+     */
+    @Override
+    public List<lyInventoryThreshold> codeList(lyInventoryThreshold inventoryThreshold) {
+        return inventoryThresholdMapper.selectCodeList(inventoryThreshold);
     }
 
     /**
@@ -52,27 +60,23 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addOrUpdate(lyInventoryThreshold inventoryThreshold) {
-        List<String> codeList = inventoryThresholdMapper.getCodeList();
-        boolean codeExists = false;
-        for (String code : codeList) {
-            if (code.equals(inventoryThreshold.getCode())) {
-                codeExists = true;
-                break;
-            }
-        }
-        if (codeExists) {
-            if (inventoryThreshold.getId() != null) {
-                inventoryThreshold.setUpdateBy(getUsername());
-                inventoryThreshold.setUpdateTime(new Date());
-                inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
+    public AjaxResult addOrUpdate(lyInventoryThreshold inventoryThreshold) {
+        if (inventoryThreshold.getId() != null) {
+            inventoryThreshold.setUpdateBy(getUsername());
+            inventoryThreshold.setUpdateTime(new Date());
+            inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
+            return AjaxResult.success("更新成功");
+        } else {
+            List<lyInventoryThreshold> result = inventoryThresholdMapper.checkCodeExists(inventoryThreshold.getCode());
+            if (!result.isEmpty()) {
+                return AjaxResult.error("零件号重复");
             } else {
                 inventoryThreshold.setCreateBy(getUsername());
                 inventoryThreshold.setCreateTime(new Date());
                 inventoryThresholdMapper.insertSelective(inventoryThreshold);
+                return AjaxResult.success("新增成功");
             }
         }
-
     }
 
     /**

@@ -4,7 +4,7 @@
     <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyInventoryThreshold" >
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="code" property="code" jdbcType="VARCHAR"/>
-<!--        <result column="color" property="color" jdbcType="VARCHAR"/>-->
+        <result column="color" property="color" jdbcType="VARCHAR"/>
         <result column="upper_limit" property="upperLimit" jdbcType="INTEGER"/>
         <result column="lower_limit" property="lowerLimit" jdbcType="INTEGER"/>
         <result column="create_by" property="createBy" jdbcType="VARCHAR"/>
@@ -14,14 +14,12 @@
     </resultMap>
     <sql id="Base_Column_List">
         id
-        , code, upper_limit, lower_limit, create_by, create_time, update_by, update_time
+        , code, color, upper_limit, lower_limit, create_by, create_time, update_by, update_time
     </sql>
     <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold" parameterType="java.lang.Long">
-        select b.*,
-               a.matText as color,
-        from ly_inventory_threshold b
-                 left join ly_inventory a on b.code = a.matCode
-        where b.id = #{id,jdbcType=BIGINT}
+        select *
+        from ly_inventory_threshold
+        where id = #{id,jdbcType=BIGINT}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -37,6 +35,9 @@
             </if>
             <if test="code != null">
                 code,
+            </if>
+            <if test="color != null">
+                color,
             </if>
             <if test="upperLimit != null">
                 upper_limit,
@@ -62,7 +63,10 @@
                 #{id,jdbcType=BIGINT},
             </if>
             <if test="code != null">
-                #{code,jdbcType=BIGINT},
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="color != null">
+                #{color,jdbcType=VARCHAR},
             </if>
             <if test="upperLimit != null">
                 #{upperLimit,jdbcType=INTEGER},
@@ -91,6 +95,9 @@
             <if test="code != null">
                 code = #{code,jdbcType=VARCHAR},
             </if>
+            <if test="color != null">
+                color = #{color,jdbcType=VARCHAR},
+            </if>
             <if test="upperLimit != null">
                 upper_limit = #{upperLimit,jdbcType=INTEGER},
             </if>
@@ -114,17 +121,24 @@
     </update>
 
     <select id="selectInventoryThresholdList" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
-        select b.*,
-        a.matText as color,
-        from ly_inventory_threshold b
-        left join ly_inventory a on b.code = a.matCode
+        select *
+        from ly_inventory_threshold
         where 1 = 1
-        <if test="code != null and code !=''" >
-            and code = #{code,jdbcType=VARCHAR}
+        <if test="code != null and code !=''">
+            and code like concat('%', #{code}, '%')
         </if>
-        <if test="color != null and color !=''" >
-            and color = #{color,jdbcType=VARCHAR}
+        <if test="color != null and color !=''">
+            and color like concat('%', #{color}, '%')
         </if>
         ORDER BY update_time desc
     </select>
+    <select id="selectCodeList" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
+        select a.matCode as code from ly_inventory a
+    </select>
+    <select id="checkCodeExists" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
+        SELECT *
+        FROM ly_inventory_threshold
+        WHERE code = #{code,jdbcType=VARCHAR}
+    </select>
+
 </mapper>

@@ -10,7 +10,9 @@ import java.util.List;
 public interface lyInventoryThresholdService {
     List<lyInventoryThreshold> list(lyInventoryThreshold inventoryThreshold);
 
-    void addOrUpdate(lyInventoryThreshold inventoryThreshold);
+    List<lyInventoryThreshold> codeList(lyInventoryThreshold inventoryThreshold);
+
+    AjaxResult addOrUpdate(lyInventoryThreshold inventoryThreshold);
 
     AjaxResult delete(Long id);
 

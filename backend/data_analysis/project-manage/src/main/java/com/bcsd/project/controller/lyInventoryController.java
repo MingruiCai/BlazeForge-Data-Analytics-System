@@ -173,7 +173,7 @@ public class lyInventoryController extends BaseController {
 
 
     /**
-     * 中央大屏-零件计划缺口统计明细
+     * 中央大屏（左侧）-零件计划缺口统计明细
      * @param
      * @return
      */
@@ -183,7 +183,7 @@ public class lyInventoryController extends BaseController {
     }
 
     /**
-     * 中央大屏-零件计划缺口统计
+     * 中央大屏（左侧）-零件计划缺口统计
      * @param
      * @return
      */
@@ -191,4 +191,26 @@ public class lyInventoryController extends BaseController {
     public AjaxResult getFhjhljqkqkCount(){
         return AjaxResult.success(inventoryImplService.getFhjhljqkqkCount());
     }
+
+
+    /**
+     * 中央大屏（右侧）-零件库存预警情况明细
+     * @param
+     * @return
+     */
+    @PostMapping("/getKcyjList")
+    public AjaxResult getKcyjList(){
+        return AjaxResult.success(inventoryImplService.getKcyjList());
+    }
+
+    /**
+     * 中央大屏（右侧）-零件库存预警情况统计
+     * @param
+     * @return
+     */
+    @PostMapping("/getKcyjCount")
+    public AjaxResult getKcyjCount(){
+        return AjaxResult.success(inventoryImplService.getKcyjCount());
+    }
+
 }

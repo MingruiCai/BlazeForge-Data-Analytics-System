@@ -1,6 +1,7 @@
 package com.bcsd.project.service;
 
 import com.bcsd.common.core.domain.AjaxResult;
+import com.bcsd.project.domain.lyInventoryThreshold;
 import com.bcsd.project.domain.lyRequirement;
 import com.bcsd.project.mapper.lyRequirementMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -47,26 +48,25 @@ public class lyRequirementImplService implements lyRequirementService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addOrUpdate(lyRequirement requirement) {
-        List<String> codeList = requirementMapper.getCodeList();
-        boolean codeExists = false;
-        for (String code : codeList) {
-            if (code.equals(requirement.getCode())) {
-                codeExists = true;
-                break;
-            }
-        }
-        if (codeExists) {
-            if (requirement.getId() != null) {
-                requirement.setUpdateBy(getUsername());
-                requirement.setUpdateTime(new Date());
-                requirementMapper.updateByPrimaryKeySelective(requirement);
+    public AjaxResult addOrUpdate(lyRequirement requirement) {
+        if (requirement.getId() != null) {
+            requirement.setUpdateBy(getUsername());
+            requirement.setUpdateTime(new Date());
+            requirementMapper.updateByPrimaryKeySelective(requirement);
+            return AjaxResult.success("更新成功");
+        } else {
+            List<lyInventoryThreshold> result = requirementMapper.checkCodeExists(requirement.getCode());
+            if (!result.isEmpty()) {
+                return AjaxResult.error("当天存在重复零件号");
             } else {
                 requirement.setCreateBy(getUsername());
                 requirement.setCreateTime(new Date());
                 requirementMapper.insertSelective(requirement);
+                return AjaxResult.success("新增成功");
             }
+
         }
+
     }
 
     /**
