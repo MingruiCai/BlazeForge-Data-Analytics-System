@@ -47,7 +47,7 @@ public class lyThresholdManagementImplService implements lyThresholdManagementSe
         thresholdManagement.setUpdateBy(getUsername());
         thresholdManagement.setUpdateTime(new Date());
         thresholdManagementMapper.updateByPrimaryKeySelective(thresholdManagement);
-        return AjaxResult.success();
+        return AjaxResult.success("更新成功");
     }
 }
 

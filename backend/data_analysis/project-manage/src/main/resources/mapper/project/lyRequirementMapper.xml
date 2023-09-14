@@ -130,12 +130,20 @@
         <if test="date != null and color !=''" >
             and date = #{date,jdbcType=TIMESTAMP}
         </if>
-        ORDER BY date
+        ORDER BY date desc
     </select>
-
-    <select id="checkCodeExists" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
-        SELECT *
-        FROM ly_requirement
-        WHERE date = #{date,jdbcType=TIMESTAMP} and code = #{code,jdbcType=VARCHAR}
+    <select id="selectCodeList" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
+        select distinct a.matCode as code, a.matText as color
+        from ly_inventory a
+        where a.matCode not in (select code from ly_requirement where date = #{date,jdbcType=TIMESTAMP} )
+        <if test="code != null and code !=''">
+            and a.matCode like concat('%', #{code}, '%')
+        </if>
+    </select>
+    <select id="checkCodeExists" parameterType="com.bcsd.project.domain.lyRequirement" resultType="com.bcsd.project.domain.lyRequirement">
+        select code
+        from ly_requirement
+        where code = #{code,jdbcType=VARCHAR}
+          and date = #{date,jdbcType=TIMESTAMP}
     </select>
 </mapper>

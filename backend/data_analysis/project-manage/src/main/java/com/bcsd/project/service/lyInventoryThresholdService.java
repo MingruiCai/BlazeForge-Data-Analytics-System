@@ -5,6 +5,8 @@ import com.bcsd.common.core.domain.AjaxResult;
 import com.bcsd.project.domain.lyInventoryThreshold;
 //import com.bcsd.project.domain.Consultation;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface lyInventoryThresholdService {
@@ -16,5 +18,9 @@ public interface lyInventoryThresholdService {
 
     AjaxResult delete(Long id);
 
-    lyInventoryThreshold selectByPrimaryKey(Long id);
+    void excelDownload(HttpServletResponse response, HttpServletRequest request);
+
+    AjaxResult importData(List<lyInventoryThreshold> data, String userName);
+
+
 }

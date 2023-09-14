@@ -1,6 +1,8 @@
 package com.bcsd.project.service;
 
 import com.bcsd.common.core.domain.AjaxResult;
+import com.bcsd.common.utils.DateUtils;
+import com.bcsd.common.utils.poi.ExcelUtil;
 import com.bcsd.project.domain.lyInventoryThreshold;
 import com.bcsd.project.domain.lyInventoryThreshold;
 //import com.bcsd.project.domain.vo.ThirdSession;
@@ -11,10 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 import static com.bcsd.common.utils.SecurityUtils.*;
 
@@ -67,15 +68,11 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
             inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
             return AjaxResult.success("更新成功");
         } else {
-            List<lyInventoryThreshold> result = inventoryThresholdMapper.checkCodeExists(inventoryThreshold.getCode());
-            if (!result.isEmpty()) {
-                return AjaxResult.error("零件号重复");
-            } else {
-                inventoryThreshold.setCreateBy(getUsername());
-                inventoryThreshold.setCreateTime(new Date());
-                inventoryThresholdMapper.insertSelective(inventoryThreshold);
-                return AjaxResult.success("新增成功");
-            }
+            inventoryThreshold.setCreateBy(getUsername());
+            inventoryThreshold.setCreateTime(new Date());
+            inventoryThresholdMapper.insertSelective(inventoryThreshold);
+            return AjaxResult.success("新增成功");
+
         }
     }
 
@@ -92,14 +89,50 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
     }
 
     /**
-     * 根据ID查询
+     * 模板下载
      *
-     * @param id
-     * @return inventoryThreshold
+     * @param response
+     * @param request
+     * @return
      */
     @Override
-    public lyInventoryThreshold selectByPrimaryKey(Long id) {
-        return inventoryThresholdMapper.selectByPrimaryKey(id);
+    public void excelDownload(HttpServletResponse response, HttpServletRequest request) {
+        List<List<String>> dataList = new ArrayList<>();
+        List<String> headList = new ArrayList<>();
+//        headList.add("序号");
+        headList.add("零件号");
+        headList.add("零件颜色");
+        headList.add("库存上限数量");
+        headList.add("库存下限数量");
+        ExcelUtil.uploadExcelAboutUser(request, response, "零件库存阈值设置导入模板", headList, dataList);
     }
+
+    /**
+     * 导入数据
+     *
+     * @param data
+     * @param userName
+     * @return
+     */
+    @Override
+    public AjaxResult importData(List<lyInventoryThreshold> data, String userName) {
+        for (lyInventoryThreshold inventoryThreshold : data) {
+            if (!inventoryThreshold.getCode().isEmpty()) {
+                List<lyInventoryThreshold> result = inventoryThresholdMapper.checkCodeExists(inventoryThreshold.getCode());
+                if (!result.isEmpty()) {
+                    inventoryThreshold.setUpdateBy(userName);
+                    inventoryThreshold.setUpdateTime(DateUtils.getNowDate());
+                    inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
+                } else {
+                    inventoryThreshold.setCreateBy(userName);
+                    inventoryThreshold.setCreateTime(DateUtils.getNowDate());
+                    inventoryThresholdMapper.insertSelective(inventoryThreshold);
+                }
+            }
+        }
+        return AjaxResult.success();
+
+    }
+
 }
 

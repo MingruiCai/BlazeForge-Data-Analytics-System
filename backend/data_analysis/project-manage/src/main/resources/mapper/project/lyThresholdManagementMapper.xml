@@ -58,6 +58,5 @@
             resultType="com.bcsd.project.domain.lyThresholdManagement">
         select *
         from ly_threshold_management
-        ORDER BY update_time desc
     </select>
 </mapper>

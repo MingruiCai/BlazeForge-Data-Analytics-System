@@ -133,12 +133,23 @@
         ORDER BY update_time desc
     </select>
     <select id="selectCodeList" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
-        select a.matCode as code from ly_inventory a
+        select distinct a.matCode as code, a.matText as color
+        from ly_inventory a
+        where 1=1
+        and a.matCode not in (select code from ly_inventory_threshold)
+        <if test="code != null and code !=''">
+            and a.matCode like concat('%', #{code}, '%')
+        </if>
     </select>
-    <select id="checkCodeExists" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
-        SELECT *
-        FROM ly_inventory_threshold
-        WHERE code = #{code,jdbcType=VARCHAR}
+
+    <select id="checkCodeExists" parameterType="java.lang.String" resultType="com.bcsd.project.domain.lyInventoryThreshold">
+        select code
+        from ly_inventory_threshold
+        where 1=1
+        <if test="code != null and code !=''">
+            and code = #{code,jdbcType=VARCHAR}
+        </if>
+
     </select>
 
 </mapper>
