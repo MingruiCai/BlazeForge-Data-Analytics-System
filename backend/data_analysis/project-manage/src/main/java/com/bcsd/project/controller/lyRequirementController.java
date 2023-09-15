@@ -87,7 +87,7 @@ public class lyRequirementController extends BaseController{
      * @param
      * @return
      */
-    @PostMapping(value = "/excelDownload")
+    @PostMapping("/excelDownload")
     public void excelDownload(HttpServletRequest request, HttpServletResponse response) {
         requirementService.excelDownload(response,request);
     }

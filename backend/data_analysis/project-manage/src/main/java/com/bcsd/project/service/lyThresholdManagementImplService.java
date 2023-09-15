@@ -36,7 +36,6 @@ public class lyThresholdManagementImplService implements lyThresholdManagementSe
     public List<lyThresholdManagement> list(lyThresholdManagement thresholdManagement) {
         return thresholdManagementMapper.selectThresholdManagementList(thresholdManagement);
     }
-
     /**
      * 更新
      * @param thresholdManagement

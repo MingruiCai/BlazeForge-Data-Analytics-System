@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.bcsd.project.mapper.lyRequirementMapper">
-    <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyRequirement" >
+    <resultMap id="BaseResultMap" type="com.bcsd.project.domain.lyRequirement">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="code" property="code" jdbcType="VARCHAR"/>
         <result column="color" property="color" jdbcType="VARCHAR"/>
@@ -16,7 +16,8 @@
         id
         , code, color, date, quantity, create_by, create_time, update_by, update_time
     </sql>
-    <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold" parameterType="java.lang.Long">
+    <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold"
+            parameterType="java.lang.Long">
         select *
         from ly_requirement
         where id = #{id,jdbcType=BIGINT}
@@ -101,9 +102,6 @@
             <if test="date != null">
                 date = #{date,jdbcType=TIMESTAMP},
             </if>
-            <if test="lowerLimit != null">
-                quantity = #{quantity,jdbcType=INTEGER},
-            </if>
             <if test="createBy != null">
                 create_by = #{createBy,jdbcType=VARCHAR},
             </if>
@@ -120,28 +118,32 @@
         where id = #{id,jdbcType=BIGINT}
     </update>
 
-    <select id="selectRequirementList" parameterType="com.bcsd.project.domain.lyRequirement" resultType="com.bcsd.project.domain.lyRequirement">
+    <select id="selectRequirementList" parameterType="com.bcsd.project.domain.lyRequirement"
+            resultType="com.bcsd.project.domain.lyRequirement">
         select *
         from ly_requirement
         where 1 = 1
-        <if test="code != null and code !=''" >
+        <if test="code != null and code !=''">
             and code like concat('%', #{code}, '%')
         </if>
-        <if test="date != null and color !=''" >
+        <if test="date != null and color !=''">
             and date = #{date,jdbcType=TIMESTAMP}
         </if>
         ORDER BY date desc
     </select>
-    <select id="selectCodeList" parameterType="com.bcsd.project.domain.lyInventoryThreshold" resultType="com.bcsd.project.domain.lyInventoryThreshold">
+    <select id="selectCodeList" parameterType="com.bcsd.project.domain.lyRequirement"
+            resultType="com.bcsd.project.domain.lyRequirement">
         select distinct a.matCode as code, a.matText as color
         from ly_inventory a
-        where a.matCode not in (select code from ly_requirement where date = #{date,jdbcType=TIMESTAMP} )
+        where a.matCode not in
+        (select code from ly_requirement where date = STR_TO_DATE(#{date}, '%Y-%m-%d'))
         <if test="code != null and code !=''">
             and a.matCode like concat('%', #{code}, '%')
         </if>
     </select>
-    <select id="checkCodeExists" parameterType="com.bcsd.project.domain.lyRequirement" resultType="com.bcsd.project.domain.lyRequirement">
-        select code
+    <select id="checkCodeExists" parameterType="com.bcsd.project.domain.lyRequirement"
+            resultType="com.bcsd.project.domain.lyRequirement">
+        select *
         from ly_requirement
         where code = #{code,jdbcType=VARCHAR}
           and date = #{date,jdbcType=TIMESTAMP}

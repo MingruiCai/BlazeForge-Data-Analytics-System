@@ -33,6 +33,8 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
 
     @Autowired
     private lyInventoryThresholdMapper inventoryThresholdMapper;
+    @Autowired
+    private lyInventoryImplService inventoryImplService;
 
     /**
      * 列表
@@ -66,14 +68,22 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
             inventoryThreshold.setUpdateBy(getUsername());
             inventoryThreshold.setUpdateTime(new Date());
             inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
-            return AjaxResult.success("更新成功");
+
         } else {
-            inventoryThreshold.setCreateBy(getUsername());
-            inventoryThreshold.setCreateTime(new Date());
-            inventoryThresholdMapper.insertSelective(inventoryThreshold);
-            return AjaxResult.success("新增成功");
+            List<lyInventoryThreshold> result = inventoryThresholdMapper.checkCodeExists(inventoryThreshold.getCode());
+            if (!result.isEmpty()) {
+                return AjaxResult.error("零件号重复");
+            } else {
+                inventoryThreshold.setCreateBy(getUsername());
+                inventoryThreshold.setCreateTime(new Date());
+                inventoryThreshold.setUpdateBy(getUsername());
+                inventoryThreshold.setUpdateTime(new Date());
+                inventoryThresholdMapper.insertSelective(inventoryThreshold);
+            }
 
         }
+        inventoryImplService.updProcessingStatus(inventoryThreshold);
+        return AjaxResult.success();
     }
 
     /**
@@ -120,6 +130,7 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
             if (!inventoryThreshold.getCode().isEmpty()) {
                 List<lyInventoryThreshold> result = inventoryThresholdMapper.checkCodeExists(inventoryThreshold.getCode());
                 if (!result.isEmpty()) {
+                    inventoryThreshold.setId(result.get(0).getId());
                     inventoryThreshold.setUpdateBy(userName);
                     inventoryThreshold.setUpdateTime(DateUtils.getNowDate());
                     inventoryThresholdMapper.updateByPrimaryKeySelective(inventoryThreshold);
@@ -129,7 +140,9 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
                     inventoryThresholdMapper.insertSelective(inventoryThreshold);
                 }
             }
+            inventoryImplService.updProcessingStatus(inventoryThreshold);
         }
+
         return AjaxResult.success();
 
     }

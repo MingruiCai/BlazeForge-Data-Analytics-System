@@ -33,6 +33,8 @@ public class lyRequirementImplService implements lyRequirementService {
 
     @Autowired
     private lyRequirementMapper requirementMapper;
+    @Autowired
+    private lyInventoryImplService inventoryImplService;
 
     /**
      * 列表
@@ -46,7 +48,6 @@ public class lyRequirementImplService implements lyRequirementService {
 
     /**
      * 零件号列表
-     *
      * @param requirement
      */
     @Override
@@ -66,13 +67,18 @@ public class lyRequirementImplService implements lyRequirementService {
             requirement.setUpdateBy(getUsername());
             requirement.setUpdateTime(new Date());
             requirementMapper.updateByPrimaryKeySelective(requirement);
-            return AjaxResult.success("更新成功");
         } else {
-            requirement.setCreateBy(getUsername());
-            requirement.setCreateTime(new Date());
-            requirementMapper.insertSelective(requirement);
-            return AjaxResult.success("新增成功");
+            List<lyRequirement> result = requirementMapper.checkCodeExists(requirement);
+            if (!result.isEmpty()) {
+                return AjaxResult.error("当天存在重复零件号");
+            } else {
+                requirement.setCreateBy(getUsername());
+                requirement.setCreateTime(new Date());
+                requirementMapper.insertSelective(requirement);
+            }
         }
+        inventoryImplService.updinventoryStatus(requirement);
+        return AjaxResult.success();
     }
 
     /**
@@ -98,7 +104,6 @@ public class lyRequirementImplService implements lyRequirementService {
     public void excelDownload(HttpServletResponse response, HttpServletRequest request) {
         List<List<String>> dataList = new ArrayList<>();
         List<String> headList = new ArrayList<>();
-//        headList.add("序号");
         headList.add("零件号");
         headList.add("零件颜色");
         headList.add("计划日期");
@@ -119,15 +124,19 @@ public class lyRequirementImplService implements lyRequirementService {
             if (!requirement.getCode().isEmpty() && requirement.getDate() != null) {
                 List<lyRequirement> result = requirementMapper.checkCodeExists(requirement);
                 if (!result.isEmpty()) {
+                    requirement.setId(result.get(0).getId());
                     requirement.setUpdateBy(userName);
                     requirement.setUpdateTime(DateUtils.getNowDate());
                     requirementMapper.updateByPrimaryKeySelective(requirement);
                 } else {
                     requirement.setCreateBy(userName);
                     requirement.setCreateTime(DateUtils.getNowDate());
+                    requirement.setUpdateBy(userName);
+                    requirement.setUpdateTime(new Date());
                     requirementMapper.insertSelective(requirement);
                 }
             }
+            inventoryImplService.updinventoryStatus(requirement);
         }
         return AjaxResult.success();
     }
