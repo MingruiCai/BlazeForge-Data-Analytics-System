@@ -213,4 +213,11 @@ public class lyInventoryController extends BaseController {
         return AjaxResult.success(inventoryImplService.getKcyjCount());
     }
 
+
+
+    @PostMapping({"/getkc"})
+    public AjaxResult getkc() {
+        inventoryImplService.add();
+        return AjaxResult.success();
+    }
 }

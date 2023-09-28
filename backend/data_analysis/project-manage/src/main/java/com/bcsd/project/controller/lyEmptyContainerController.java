@@ -124,6 +124,10 @@ public class lyEmptyContainerController extends BaseController {
 //        return success(lyInventoryImplService.getInfo(id));
 //    }
 
-
+    @PostMapping({"/getkrq"})
+    public AjaxResult getkrq() {
+        emptyContainerImplService.add();
+        return AjaxResult.success();
+    }
 
 }

@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bcsd.common.core.domain.AjaxResult;
 import com.bcsd.common.utils.DateUtils;
+import com.bcsd.common.utils.http.HttpUtils;
+import com.bcsd.common.utils.http.HttpUtilsNew;
 import com.bcsd.common.utils.poi.ExcelUtil;
 import com.bcsd.project.constants.Constants;
 import com.bcsd.project.domain.lyEmptyContainer;
@@ -21,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +42,8 @@ import java.util.*;
 public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMapper, lyEmptyContainer> implements IService<lyEmptyContainer> {
     @Autowired
     private lyThresholdManagementMapper thresholdManagementMapper;
-
+    @Value("${http.url}")
+    private String url;
     /**
      * 新增空容器基本信息
      * @param
@@ -47,92 +51,43 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
      */
     @Transactional(rollbackFor = Exception.class)
     public void add(){
-        /*JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("pageNum",1);
-        jsonObject.put("pageSize",10000);
+        jsonObject.put("pageSize",100000);
+        jsonObject.put("sourceId","REST030104");
         JSONObject jsonObject1 = new JSONObject();
-        jsonObject1.put("sourceId","REST030104");
+        jsonObject1.put("whCode","2022");
         jsonObject.put("param",jsonObject1);
-        String res = HttpUtils.sendPost(url+"permit/findByPage", jsonObject.toString());*/
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n" +
-                "    \"code\": \"0\",\n" +
-                "    \"message\": \"成功\",\n" +
-                "    \"data\": [\n" +
-                "        {\n" +
-                "            \"podTypCode\": \"BB\",\n" +
-                "            \"podStr8\": null,\n" +
-                "            \"intoBlkUserFlagText\": \"未冻结\",\n" +
-                "            \"blkType\": null,\n" +
-                "            \"agvFlag\": 1,\n" +
-                "            \"emptyPodFlag\": null,\n" +
-                "            \"podStr4\": null,\n" +
-                "            \"podStr5\": null,\n" +
-                "            \"podStr6\": null,\n" +
-                "            \"podStr7\": null,\n" +
-                "            \"podTypText\": \"BB\",\n" +
-                "            \"podStr1\": null,\n" +
-                "            \"blkReaText\": null,\n" +
-                "            \"initStatus\": 1,\n" +
-                "            \"podStr2\": null,\n" +
-                "            \"berthCode\": \"205077XD208826\",\n" +
-                "            \"podStr3\": null,\n" +
-                "            \"podLayout\": null,\n" +
-                "            \"layer\": null,\n" +
-                "            \"blkReaCode\": null,\n" +
-                "            \"podCode\": \"100001\",\n" +
-                "            \"cooY\": 208826.0,\n" +
-                "            \"cooX\": 205077.0,\n" +
-                "            \"mapName\": null,\n" +
-                "            \"podText\": \"100001\",\n" +
-                "            \"distanceWb\": 0.0,\n" +
-                "            \"agvFlagText\": \"AGV库\",\n" +
-                "            \"stgTypText\": \"F1一车间叉车收货位\",\n" +
-                "            \"outBlkUserFlag\": 0,\n" +
-                "            \"middle\": null,\n" +
-                "            \"batchAttrValue\": \"{\\\"batchAttr07\\\":\\\"已装配\\\",\\\"dateExpire\\\":1693308343226,\\\"dateGen\\\":1691942400000,\\\"dateInto\\\":1692012343226,\\\"matCode\\\":\\\"H53A5006215AABH01\\\",\\\"ownerCode\\\":\\\"LY\\\",\\\"packFormat\\\":\\\"1/1/0/0\\\",\\\"qualityStatus\\\":\\\"F\\\"}\",\n" +
-                "            \"podIntoTempLockText\": \"未锁定\",\n" +
-                "            \"outBlkUserFlagText\": \"未冻结\",\n" +
-                "            \"emptyBinCount\": 0,\n" +
-                "            \"whText\": \"武汉燎原二车间\",\n" +
-                "            \"binUtilization\": \"0/1\",\n" +
-                "            \"initStatusText\": \"已初始化\",\n" +
-                "            \"whCode\": \"2022\",\n" +
-                "            \"intoBlkUserFlag\": 0,\n" +
-                "            \"blkUser\": null,\n" +
-                "            \"berthAlias\": \"205077XD208826\",\n" +
-                "            \"podIntoTempLock\": \"0\",\n" +
-                "            \"stgTypCode\": \"F101\",\n" +
-                "            \"hotIndex\": \"3.0\",\n" +
-                "            \"mapCode\": \"XD\",\n" +
-                "            \"podWei\": null\n" +
-                "        }],\n" +
-                "    \"total\": 824,\n" +
-                "    \"success\": true\n" +
-                "}");
-        /*sb.append("");
-        sb.append("");*/
-
-        String res = sb.toString();
-        JSONObject jsonObject2 = JSONObject.parseObject(res);
-        if(!jsonObject2.getString("code").equals("0")){
-            log.error("获取数据失败"+jsonObject2.getString("message"));
-            return;
-        }
-        String data = jsonObject2.getString("data");
-        List <lyEmptyContainer> entityList = JSON.parseArray(data,lyEmptyContainer.class);
-        for (lyEmptyContainer param : entityList) {
-            String[] split = param.getBinUtilization().split("/");
-            param.setTotalCount(Integer.parseInt(split[1]));
-            param.setPodTypeCount(Integer.parseInt(split[0]));
-            lyEmptyContainer emptyContainer = baseMapper.selectByPodCode(param);
-            if(ObjectUtils.isNotEmpty(emptyContainer)){
-                BeanUtils.copyProperties(emptyContainer,param);
-                baseMapper.updateById(emptyContainer);
-                break;
+        log.error("空容器请求参数："+jsonObject.toString());
+        try {
+            String res = HttpUtilsNew.jsonPost(url, jsonObject.toString());
+            //log.error("空容器返回参数：" + res);
+            JSONObject jsonObject2 = JSONObject.parseObject(res);
+            log.error("空容器返回个数：" + jsonObject2.size()+",total："+jsonObject2.getString("total"));
+            if (!jsonObject2.getString("code").equals("0")) {
+                log.error("空容器获取数据失败" + jsonObject2.getString("message"));
+                return;
             }
-            param.setCreateTime(new Date());
-            baseMapper.insert(param);
+            String data = jsonObject2.getString("data");
+            List<lyEmptyContainer> entityList = JSON.parseArray(data, lyEmptyContainer.class);
+            for (lyEmptyContainer param : entityList) {
+                String[] split = param.getBinUtilization().split("/");
+                param.setTotalCount(Integer.parseInt(split[1]));
+                param.setPodTypeCount(Integer.parseInt(split[0]));
+                lyEmptyContainer emptyContainer = baseMapper.selectByPodCode(param);
+                if (ObjectUtils.isNotEmpty(emptyContainer)) {
+                    log.error("空容器变更podCode：" + emptyContainer.getPodCode());
+                    BeanUtils.copyProperties(emptyContainer, param);
+                    baseMapper.updateById(emptyContainer);
+                }else {
+                    log.error("空容器新增podCode：" + emptyContainer.getPodCode());
+                    param.setCreateTime(new Date());
+                    baseMapper.insert(param);
+                }
+
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

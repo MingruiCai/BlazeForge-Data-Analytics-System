@@ -193,9 +193,10 @@
   </update>
 
   <select id="getFhjhljqkqkCount" resultType="map">
-    SELECT sum(t2.quantity - t1.totalQty) AS gapTatal,count(1) AS gapCount
+    SELECT IF(sum(t2.quantity - t1.totalQty) > 0, sum(t2.quantity - t1.totalQty), 0) AS gapTatal,IF(sum(t2.quantity - t1.totalQty) > 0, count(1), 0) AS gapCount
     FROM ly_inventory t1
     INNER JOIN ly_requirement t2 ON t1.matCode = t2.code where t2.date = CURDATE()
+		AND (t2.quantity - t1.totalQty) > 0
   </select>
 
   <select id="getFhjhljqkqkList" resultType="map">
