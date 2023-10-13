@@ -3,8 +3,10 @@ package com.bcsd.project.service;
 import com.bcsd.common.core.domain.AjaxResult;
 import com.bcsd.common.utils.DateUtils;
 import com.bcsd.common.utils.poi.ExcelUtil;
+import com.bcsd.project.domain.lyInventory;
 import com.bcsd.project.domain.lyInventoryThreshold;
 import com.bcsd.project.domain.lyRequirement;
+import com.bcsd.project.mapper.lyInventoryMapper;
 import com.bcsd.project.mapper.lyRequirementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static com.bcsd.common.utils.SecurityUtils.getUsername;
 
@@ -34,7 +37,7 @@ public class lyRequirementImplService implements lyRequirementService {
     @Autowired
     private lyRequirementMapper requirementMapper;
     @Autowired
-    private lyInventoryImplService inventoryImplService;
+    private lyInventoryMapper inventoryMapper;
 
     /**
      * 列表
@@ -48,6 +51,7 @@ public class lyRequirementImplService implements lyRequirementService {
 
     /**
      * 零件号列表
+     *
      * @param requirement
      */
     @Override
@@ -63,6 +67,15 @@ public class lyRequirementImplService implements lyRequirementService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public AjaxResult addOrUpdate(lyRequirement requirement) {
+        lyInventory byMatCode = inventoryMapper.getByMatCodeGroup(requirement.getCode());
+        if (byMatCode != null && (requirement.getProcessingStatus()==null || requirement.getProcessingStatus() != 2)) {
+            Double qty = Double.valueOf(requirement.getQuantity()) - byMatCode.getTotalQty();
+            if (qty > 0) {
+                requirement.setProcessingStatus(1);  //未处理
+            } else {
+                requirement.setProcessingStatus(0);  //无需处理
+            }
+        }
         if (requirement.getId() != null) {
             requirement.setUpdateBy(getUsername());
             requirement.setUpdateTime(new Date());
@@ -77,7 +90,7 @@ public class lyRequirementImplService implements lyRequirementService {
                 requirementMapper.insertSelective(requirement);
             }
         }
-        inventoryImplService.updinventoryStatus(requirement);
+        //inventoryImplService.updinventoryStatus(requirement);
         return AjaxResult.success();
     }
 
@@ -123,6 +136,15 @@ public class lyRequirementImplService implements lyRequirementService {
         for (lyRequirement requirement : data) {
             if (!requirement.getCode().isEmpty() && requirement.getDate() != null) {
                 List<lyRequirement> result = requirementMapper.checkCodeExists(requirement);
+                lyInventory byMatCode = inventoryMapper.getByMatCodeGroup(requirement.getCode());
+                if (byMatCode != null && (requirement.getProcessingStatus()==null || requirement.getProcessingStatus() != 2)) {
+                    Double qty = Double.valueOf(requirement.getQuantity()) - byMatCode.getTotalQty();
+                    if (qty > 0) {
+                        requirement.setProcessingStatus(1);  //未处理
+                    } else {
+                        requirement.setProcessingStatus(0);  //无需处理
+                    }
+                }
                 if (!result.isEmpty()) {
                     requirement.setId(result.get(0).getId());
                     requirement.setUpdateBy(userName);
@@ -136,9 +158,32 @@ public class lyRequirementImplService implements lyRequirementService {
                     requirementMapper.insertSelective(requirement);
                 }
             }
-            inventoryImplService.updinventoryStatus(requirement);
+            //inventoryImplService.updinventoryStatus(requirement);
         }
         return AjaxResult.success();
     }
+
+    /**
+     * 新增库存时，修改状态
+     * @param matCodeSet
+     */
+    public void updinventoryStatus(Set<String> matCodeSet) {
+        for (String matCode : matCodeSet) {
+            lyInventory byMatCode = inventoryMapper.getByMatCodeGroup(matCode);
+            lyRequirement requirement = requirementMapper.getRequirement(matCode);
+            if (byMatCode != null && requirement != null && (requirement.getProcessingStatus()==null || requirement.getProcessingStatus() != 2)) {
+                Double qty = Double.valueOf(requirement.getQuantity()) - byMatCode.getTotalQty();
+                if (qty > 0) {
+                    requirement.setProcessingStatus(1);  //未处理
+                } else {
+                    requirement.setProcessingStatus(0);  //无需处理
+                }
+                requirementMapper.updateByPrimaryKeySelective(requirement);
+            }
+        }
+    }
+
+
+
 }
 

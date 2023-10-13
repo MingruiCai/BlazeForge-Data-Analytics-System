@@ -11,6 +11,7 @@ import com.bcsd.project.domain.lyInventory;
 import com.bcsd.project.domain.vo.ArchiveProjectVO;
 import com.bcsd.project.service.ProjectImplVersionService;
 import com.bcsd.project.service.lyInventoryImplService;
+import com.bcsd.project.task.InventoryTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class lyInventoryController extends BaseController {
 
     @Autowired
     lyInventoryImplService inventoryImplService;
+    @Autowired
+    InventoryTask inventoryTask;
 
     /**
      * 导入数据
@@ -217,7 +220,7 @@ public class lyInventoryController extends BaseController {
 
     @PostMapping({"/getkc"})
     public AjaxResult getkc() {
-        inventoryImplService.add();
+        inventoryTask.monthly15th();
         return AjaxResult.success();
     }
 }

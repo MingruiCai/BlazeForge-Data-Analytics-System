@@ -22,4 +22,7 @@ public interface lyInventoryThresholdMapper {
     @Select("select * from ly_inventory_threshold")
     List<lyInventoryThreshold> getList();
 
+    @Select("select * from ly_inventory_threshold where id = #{id}")
+    lyInventoryThreshold selectById(Long id);
+
 }

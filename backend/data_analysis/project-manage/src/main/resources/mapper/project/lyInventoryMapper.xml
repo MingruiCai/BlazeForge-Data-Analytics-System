@@ -150,77 +150,103 @@
   </select>
   
   <select id="inventoryAlarmCount" resultType="map" parameterType="com.bcsd.project.domain.lyInventory">
-    SELECT t1.matCode,t1.matText,t1.inventoryStatus,t1.totalQty,t2.upper_limit AS upperLimit,t2.lower_limit AS lowerLimit FROM ly_inventory t1
-    LEFT JOIN ly_inventory_threshold t2 ON t1.matCode = t2.code
+    SELECT * FROM (
+    SELECT
+    tt.matCode,tt.matText,
+    (case
+    when tt.totalQty &lt; t2.lower_limit then 1
+    when tt.totalQty &gt; t2.upper_limit then 2
+    when tt.totalQty &gt; t2.upper_limit AND tt.totalQty &lt; t2.lower_limit  then 0
+    else null end) AS inventoryStatus,
+    tt.totalQty,t2.upper_limit AS upperLimit,t2.lower_limit AS lowerLimit
+    FROM
+    (SELECT DISTINCT(t1.matCode) as matCode,t1.matText,sum(t1.totalQty) as totalQty FROM ly_inventory t1
+    GROUP BY matCode) AS tt
+    LEFT JOIN ly_inventory_threshold t2 ON tt.matCode = t2.code ) t
     where 1=1
-      <if test="inventoryStatus != null">
-        and t1.inventoryStatus = #{inventoryStatus}
-      </if>
+    <if test="inventoryStatus != null">
+      and t.inventoryStatus = #{inventoryStatus}
+    </if>
     <if test="matCode != null and matCode != ''">
-      and t1.matCode LIKE CONCAT('%',#{matCode},'%')
+      and t.matCode LIKE CONCAT('%',#{matCode},'%')
     </if>
     <if test="matText != null and matText != ''">
-      and t1.matText LIKE CONCAT('%',#{matText},'%')
+      and t.matText LIKE CONCAT('%',#{matText},'%')
     </if>
   </select>
 
 
   <select id="getGapsNumber" resultType="com.bcsd.project.domain.vo.InventoryGapsNumberVO" parameterType="com.bcsd.project.domain.lyInventory">
-    SELECT t1.id,t1.matCode,t1.matText,t1.totalQty,t1.processingStatus,t2.date,t2.quantity,(t2.quantity - t1.totalQty) AS gapNumber
-    FROM ly_inventory t1
-    INNER JOIN ly_requirement t2 ON t1.matCode = t2.code where 1=1
+    SELECT
+    t2.id,
+    tt.matCode,tt.matText,
+    t2.processingStatus,tt.totalQty,
+    DATE_FORMAT(t2.date, '%Y-%m-%d') AS date,t2.quantity,IF((t2.quantity - tt.totalQty)>0,(t2.quantity - tt.totalQty),0) AS gapNumber
+    FROM
+    (SELECT DISTINCT(t1.matCode) as matCode,t1.matText,sum(t1.totalQty) as totalQty FROM ly_inventory t1
+    GROUP BY matCode) AS tt
+    INNER JOIN ly_requirement t2 ON tt.matCode = t2.code where 1=1
     <if test="processingStatus != null">
-      and t1.processingStatus = #{processingStatus}
+      and tt.processingStatus = #{processingStatus}
     </if>
     <if test="date != null and date != ''">
       and t2.date = #{date}
     </if>
     <if test="matCode != null and matCode != ''">
-      and t1.matCode LIKE CONCAT('%',#{matCode},'%')
+      and tt.matCode LIKE CONCAT('%',#{matCode},'%')
     </if>
     <if test="matText != null and matText != ''">
-      and t1.matText LIKE CONCAT('%',#{matText},'%')
+      and tt.matText LIKE CONCAT('%',#{matText},'%')
     </if>
     ORDER BY t2.date DESC
   </select>
 
-  <update id="updProcessingStatus" parameterType="object">
-    update ly_inventory set
-    processingStatus = #{processingStatus},
-    update_by = #{updateBy},
-    update_time = #{updateTime}
-     where id = #{id}
-  </update>
+  <!--<update id="updProcessingStatus" parameterType="object">-->
+    <!--update ly_requirement set-->
+    <!--processingStatus = #{processingStatus},-->
+    <!--update_by = #{updateBy},-->
+    <!--update_time = #{updateTime}-->
+     <!--where id = #{id}-->
+  <!--</update>-->
 
   <select id="getFhjhljqkqkCount" resultType="map">
-    SELECT IF(sum(t2.quantity - t1.totalQty) > 0, sum(t2.quantity - t1.totalQty), 0) AS gapTatal,IF(sum(t2.quantity - t1.totalQty) > 0, count(1), 0) AS gapCount
-    FROM ly_inventory t1
-    INNER JOIN ly_requirement t2 ON t1.matCode = t2.code where t2.date = CURDATE()
-		AND (t2.quantity - t1.totalQty) > 0
+    SELECT IF(sum(t2.quantity - tt.totalQty)>0,sum(t2.quantity - tt.totalQty),0) AS gapTatal
+		,IF(sum(t2.quantity - tt.totalQty) > 0, count(1), 0) AS gapCount
+    FROM
+    (SELECT DISTINCT(t1.matCode) as matCode,t1.matText,sum(t1.totalQty) as totalQty FROM ly_inventory t1
+    GROUP BY matCode) AS tt
+    INNER JOIN ly_requirement t2 ON tt.matCode = t2.code where t2.date =  CURDATE() AND (t2.quantity - tt.totalQty) > 0
   </select>
 
   <select id="getFhjhljqkqkList" resultType="map">
-    SELECT t1.matText,t2.quantity,(t2.quantity - t1.totalQty) AS gapNumber
-    FROM ly_inventory t1
-    INNER JOIN ly_requirement t2 ON t1.matCode = t2.code where t2.date = CURDATE()
-    AND (t2.quantity - t1.totalQty) > 0
+    SELECT tt.matText,t2.quantity,IF((t2.quantity - tt.totalQty)>0,(t2.quantity - tt.totalQty),0) AS gapNumber
+    FROM
+    (SELECT DISTINCT(t1.matCode) as matCode,t1.matText,sum(t1.totalQty) as totalQty FROM ly_inventory t1
+    GROUP BY matCode) AS tt
+    INNER JOIN ly_requirement t2 ON tt.matCode = t2.code where t2.date =  CURDATE()
+		AND (t2.quantity - tt.totalQty) > 0
   </select>
   
-  <select id="getKcyjCount" resultType="map">
+  <!--<select id="getKcyjCount" resultType="map">
     SELECT
       SUM( u.`inventoryStatus` = 1 ) oneCount,
       SUM( u.`inventoryStatus` = 2 ) towCount
     FROM
 	  ly_inventory u;
-  </select>
+  </select>-->
 
   <select id="getKcyjList" resultType="map">
-    SELECT t1.matCode,t1.matText,t1.inventoryStatus,t1.totalQty,t2.upper_limit AS upperLimit,t2.lower_limit AS lowerLimit FROM ly_inventory t1
-    INNER JOIN ly_inventory_threshold t2 ON t1.matCode = t2.code
-    where inventoryStatus in(1,2);
+    SELECT DISTINCT(t1.matCode) as matCode,t1.matText,sum(t1.totalQty) as totalQty FROM ly_inventory t1
+		GROUP BY matCode
   </select>
 
   <select id="getByMatCode" resultType="com.bcsd.project.domain.lyInventory" parameterType="string">
     select * from ly_inventory where matCode = #{matCode}
   </select>
+
+    <update id="updInventoryStatusNull" parameterType="string">
+    update ly_inventory set
+    inventoryStatus = null
+     where matCode = #{matCode}
+  </update>
 </mapper>

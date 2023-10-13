@@ -82,7 +82,7 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
             }
 
         }
-        inventoryImplService.updProcessingStatus(inventoryThreshold);
+        //inventoryImplService.updProcessingStatus(inventoryThreshold);
         return AjaxResult.success();
     }
 
@@ -94,6 +94,8 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
     @Override
     @Transactional(rollbackFor = Exception.class)
     public AjaxResult delete(Long id) {
+        /*lyInventoryThreshold threshold = inventoryThresholdMapper.selectById(id);
+        inventoryImplService.updInventoryStatusNull(threshold);*/
         inventoryThresholdMapper.deleteByPrimaryKey(id);
         return AjaxResult.success();
     }
@@ -140,7 +142,7 @@ public class lyInventoryThresholdImplService implements lyInventoryThresholdServ
                     inventoryThresholdMapper.insertSelective(inventoryThreshold);
                 }
             }
-            inventoryImplService.updProcessingStatus(inventoryThreshold);
+            //inventoryImplService.updProcessingStatus2(inventoryThreshold,userName);
         }
 
         return AjaxResult.success();

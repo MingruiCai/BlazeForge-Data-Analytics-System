@@ -20,7 +20,7 @@ public class EmptyContainerTask {
     @Autowired
     lyEmptyContainerImplService emptyContainerImplService;
     //半个小时执行一次
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void monthly15th(){
         emptyContainerImplService.add();
     }

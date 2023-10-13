@@ -49,4 +49,12 @@ public class lyRequirement extends BaseInfo {
     @TableField("quantity")
     private Integer quantity;
 
+    /**
+     * 计划发货数量
+     */
+    @Excel(name = "缺口处理状态")
+    @ApiModelProperty(value = "缺口处理状态（0：无需处理，1：未处理，2：已处理）")
+    @TableField("processingStatus")
+    private Integer processingStatus;
+
 }

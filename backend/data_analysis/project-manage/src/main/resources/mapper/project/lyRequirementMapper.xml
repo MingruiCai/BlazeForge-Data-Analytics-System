@@ -11,9 +11,10 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="update_by" property="updateBy" jdbcType="VARCHAR"/>
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="processingStatus" property="processingStatus" jdbcType="INTEGER"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id
+        id,processingStatus
         , code, color, date, quantity, create_by, create_time, update_by, update_time
     </sql>
     <select id="selectByPrimaryKey" resultType="com.bcsd.project.domain.lyInventoryThreshold"
@@ -58,6 +59,9 @@
             <if test="updateTime != null">
                 update_time,
             </if>
+            <if test="processingStatus != null">
+                processingStatus,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -87,6 +91,9 @@
             <if test="updateTime != null">
                 #{updateTime,jdbcType=TIMESTAMP},
             </if>
+            <if test="processingStatus != null">
+                #{processingStatus,jdbcType=INTEGER},
+            </if>
         </trim>
     </insert>
 
@@ -113,6 +120,12 @@
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="quantity != null">
+                quantity = #{quantity,jdbcType=INTEGER},
+            </if>
+            <if test="processingStatus != null">
+                processingStatus = #{processingStatus,jdbcType=INTEGER},
             </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
@@ -148,4 +161,13 @@
         where code = #{code,jdbcType=VARCHAR}
           and date = #{date,jdbcType=TIMESTAMP}
     </select>
+
+
+    <update id="updProcessingStatus" parameterType="object">
+        update ly_requirement set
+        processingStatus = #{processingStatus},
+        update_by = #{updateBy},
+        update_time = #{updateTime}
+         where id = #{id}
+  </update>
 </mapper>

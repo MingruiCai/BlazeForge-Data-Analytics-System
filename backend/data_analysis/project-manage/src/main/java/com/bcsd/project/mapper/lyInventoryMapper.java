@@ -31,16 +31,21 @@ public interface lyInventoryMapper extends BaseMapper<lyInventory> {
 
     List<InventoryGapsNumberVO> getGapsNumber(lyInventory params);
 
-    int updProcessingStatus(JSONObject params);
+
 
     Map<String,Object> getFhjhljqkqkCount();
 
     List<Map<String,Object>> getFhjhljqkqkList();
 
-    Map<String,Object> getKcyjCount();
+    //Map<String,Object> getKcyjCount();
 
     List<Map<String,Object>> getKcyjList();
 
     List<lyInventory> getByMatCode(String matCode);
 
+    int updInventoryStatusNull(String matCode);
+
+    @Select("SELECT DISTINCT(matCode)as matCode,matText,sum(totalQty) as totalQty FROM ly_inventory " +
+            "WHERE matCode = #{matCode} GROUP BY matCode")
+    lyInventory getByMatCodeGroup(String matCode);
 }

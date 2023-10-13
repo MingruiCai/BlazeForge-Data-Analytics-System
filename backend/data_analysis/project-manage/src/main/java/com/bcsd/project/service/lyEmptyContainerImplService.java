@@ -63,13 +63,14 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
             String res = HttpUtilsNew.jsonPost(url, jsonObject.toString());
             //log.error("空容器返回参数：" + res);
             JSONObject jsonObject2 = JSONObject.parseObject(res);
-            log.error("空容器返回个数：" + jsonObject2.size()+",total："+jsonObject2.getString("total"));
+            log.error("空容器返回个数：total："+jsonObject2.getString("total"));
             if (!jsonObject2.getString("code").equals("0")) {
                 log.error("空容器获取数据失败" + jsonObject2.getString("message"));
                 return;
             }
             String data = jsonObject2.getString("data");
             List<lyEmptyContainer> entityList = JSON.parseArray(data, lyEmptyContainer.class);
+            log.error("空容器返回个数：size："+entityList.size());
             for (lyEmptyContainer param : entityList) {
                 String[] split = param.getBinUtilization().split("/");
                 param.setTotalCount(Integer.parseInt(split[1]));
@@ -80,7 +81,7 @@ public class lyEmptyContainerImplService extends ServiceImpl<lyEmptyContainerMap
                     BeanUtils.copyProperties(emptyContainer, param);
                     baseMapper.updateById(emptyContainer);
                 }else {
-                    log.error("空容器新增podCode：" + emptyContainer.getPodCode());
+                    log.error("空容器新增podCode：" + param.getPodCode());
                     param.setCreateTime(new Date());
                     baseMapper.insert(param);
                 }
